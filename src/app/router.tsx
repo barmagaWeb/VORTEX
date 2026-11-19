@@ -30,7 +30,6 @@ const RouteLoading: React.FC = () => (
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
-
   if (isLoading) return <RouteLoading />;
   if (!user) return <Navigate to="/auth/signin" replace />;
   if (!isAuthenticated) return <Navigate to="/auth/verify" replace />;
@@ -39,7 +38,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
-
   if (isLoading) return <RouteLoading />;
   if (user && user.emailVerified === false) return <Navigate to="/auth/verify" replace />;
   if (isAuthenticated) return <Navigate to="/feed" replace />;
@@ -53,14 +51,12 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     let active = true;
-
     const verifyAdminRole = async () => {
       if (isLoading || !isAuthenticated || !user) {
         setIsChecking(false);
         setIsAuthorized(false);
         return;
       }
-
       setIsChecking(true);
       try {
         const allowed = await authService.hasAdminRole();
@@ -71,11 +67,8 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         if (active) setIsChecking(false);
       }
     };
-
     void verifyAdminRole();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [isAuthenticated, isLoading, user?.id]);
 
   if (isLoading) return <RouteLoading />;
@@ -88,7 +81,6 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const VerificationRoute: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
-
   if (isLoading) return <RouteLoading />;
   if (isAuthenticated) return <Navigate to="/feed" replace />;
   if (user?.emailVerified) return <Navigate to="/feed" replace />;
@@ -96,51 +88,14 @@ const VerificationRoute: React.FC = () => {
 };
 
 export const router = createBrowserRouter([
+  { path: '/', element: <LandingPage /> },
+  { path: '/auth/signin', element: <GuestRoute><SignInPage /></GuestRoute> },
+  { path: '/auth/signup', element: <GuestRoute><SignUpPage /></GuestRoute> },
+  { path: '/auth/forgot', element: <GuestRoute><ForgotPasswordPage /></GuestRoute> },
+  { path: '/auth/verify', element: <VerificationRoute /> },
+  { path: '/auth/reset', element: <ResetPasswordPage /> },
   {
-    path: '/',
-    element: <LandingPage />,
-  },
-
-  {
-    path: '/auth/signin',
-    element: (
-      <GuestRoute>
-        <SignInPage />
-      </GuestRoute>
-    ),
-  },
-  {
-    path: '/auth/signup',
-    element: (
-      <GuestRoute>
-        <SignUpPage />
-      </GuestRoute>
-    ),
-  },
-  {
-    path: '/auth/forgot',
-    element: (
-      <GuestRoute>
-        <ForgotPasswordPage />
-      </GuestRoute>
-    ),
-  },
-  {
-    path: '/auth/verify',
-    element: <VerificationRoute />,
-  },
-  // A valid password-recovery callback must remain accessible to its authenticated user.
-  {
-    path: '/auth/reset',
-    element: <ResetPasswordPage />,
-  },
-
-  {
-    element: (
-      <ProtectedRoute>
-        <AppLayout showRightSidebar={true} />
-      </ProtectedRoute>
-    ),
+    element: <ProtectedRoute><AppLayout showRightSidebar={true} /></ProtectedRoute>,
     children: [
       { path: '/feed', element: <HomePage /> },
       { path: '/explore', element: <ExplorePage /> },
@@ -151,31 +106,15 @@ export const router = createBrowserRouter([
       { path: '/communities/:slug', element: <CommunityDetailPage /> },
       { path: '/bookmarks', element: <BookmarksPage /> },
       { path: '/settings', element: <SettingsPage /> },
-      {
-        path: '/admin',
-        element: (
-          <AdminRoute>
-            <AdminPage />
-          </AdminRoute>
-        ),
-      },
+      { path: '/admin', element: <AdminRoute><AdminPage /></AdminRoute> },
       { path: '/hashtag/:tag', element: <HashtagPage /> },
     ],
   },
-
   {
-    element: (
-      <ProtectedRoute>
-        <AppLayout showRightSidebar={false} />
-      </ProtectedRoute>
-    ),
-    children: [
-      { path: '/messages', element: <MessagesPage /> },
-    ],
+    element: <ProtectedRoute><AppLayout showRightSidebar={false} /></ProtectedRoute>,
+    children: [{ path: '/messages', element: <MessagesPage /> }],
   },
-
-  {
-    path: '*',
-    element: <Navigate to="/" replace />,
-  },
-]);
+  { path: '*', element: <Navigate to="/" replace /> },
+], {
+  basename: '/VORTEX',
+});
