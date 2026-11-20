@@ -72,7 +72,7 @@ export const VerifyEmailPage: React.FC = () => {
         : 'Your verification request was accepted. Check your inbox and spam folder.');
     } catch (requestError) {
       const message = requestError instanceof Error ? requestError.message : t('verificationSendFailed');
-      const waitMatch = message.match(/after\\s+(\\d+)\\s+seconds?/i);
+      const waitMatch = message.match(/after\s+(\d+)\s+seconds?/i);
       if (waitMatch || /over_email_send_rate_limit|email rate limit exceeded/i.test(message)) {
         setResendCooldown(Math.max(32, Number(waitMatch?.[1] || 0) + 1));
         setError(language === 'ar'
