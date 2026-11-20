@@ -190,6 +190,10 @@ export class MockMessagingService implements IMessagingService {
     }
   }
 
+  subscribeToInboxMessages(_onMessage: (message: Message) => void): () => void {
+    return () => undefined;
+  }
+
   subscribeToMessages(_conversationId: string, _onMessage: (message: Message) => void): () => void {
     return () => undefined;
   }
