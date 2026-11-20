@@ -24,6 +24,9 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
   const [replyText, setReplyText] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const getUsernameLabel = (username: string, fallback: string) =>
+    username ? `@${username.replace(/^@/, '')}` : fallback;
+
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -116,10 +119,10 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
           {comments.map((comment) => (
             <div key={comment.id} className="space-y-2 text-start">
               <div className="flex gap-2.5 items-start">
-                <Avatar src={comment.author.avatar} alt={comment.author.name} size="sm" />
+                <Avatar src={comment.author.avatar} alt={getUsernameLabel(comment.author.username, comment.author.name)} size="sm" />
                 <div className="flex-1 bg-surface-elevated/70 rounded-2xl p-3 border border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-fg"><bdi>{comment.author.name}</bdi></span>
+                    <span className="text-xs font-bold text-fg"><bdi>{getUsernameLabel(comment.author.username, comment.author.name)}</bdi></span>
                     <span className="text-[10px] text-fg-subtle">{comment.createdAt}</span>
                   </div>
                   <p className="text-xs sm:text-sm text-fg-muted mt-1 leading-relaxed" dir="auto">
@@ -162,7 +165,7 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
                     value={replyText}
                     maxLength={5000}
                     onChange={(e) => setReplyText(e.target.value.slice(0, 5000))}
-                    placeholder={t('replyToPlaceholder', { name: comment.author.name })}
+                    placeholder={t('replyToPlaceholder', { name: getUsernameLabel(comment.author.username, comment.author.name) })}
                     dir="auto"
                     className="flex-1 bg-surface text-xs text-fg rounded-full px-3 py-1.5 border border-border outline-none focus:border-primary placeholder:text-fg-subtle"
                     autoFocus
@@ -183,10 +186,10 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
                 <div className="ms-10 space-y-2 border-s-2 border-border ps-3">
                   {comment.replies.map((reply) => (
                     <div key={reply.id} className="flex gap-2 items-start">
-                      <Avatar src={reply.author.avatar} alt={reply.author.name} size="xs" />
+                      <Avatar src={reply.author.avatar} alt={getUsernameLabel(reply.author.username, reply.author.name)} size="xs" />
                       <div className="flex-1 bg-surface rounded-xl p-2.5 border border-border">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-fg"><bdi>{reply.author.name}</bdi></span>
+                          <span className="text-xs font-bold text-fg"><bdi>{getUsernameLabel(reply.author.username, reply.author.name)}</bdi></span>
                           <span className="text-[10px] text-fg-subtle">{reply.createdAt}</span>
                         </div>
                         <p className="text-xs text-fg-muted mt-0.5" dir="auto">{reply.content}</p>
