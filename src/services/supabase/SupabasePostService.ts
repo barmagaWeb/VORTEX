@@ -102,7 +102,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.getFeed(tab, communityId);
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
 
     const postSelection = `
       *,
@@ -146,7 +146,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.getUserPosts(userId);
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     let query = supabase
       .from('posts')
       .select(`
@@ -174,7 +174,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.getBookmarkedPosts();
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     if (!user) return [];
 
     const { data, error } = await supabase
@@ -211,7 +211,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.getPostById(postId);
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     let query = supabase
       .from('posts')
       .select(`
@@ -236,7 +236,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.createPost(dto);
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     if (!user) throw new Error('Authentication required');
 
     const { data: newPost, error } = await supabase
@@ -278,7 +278,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.updatePost(postId, content);
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     let query = supabase
       .from('posts')
       .update({ content, updated_at: new Date().toISOString() })
@@ -383,7 +383,7 @@ export class SupabasePostService implements IPostService {
       return this.fallbackMock.addComment(postId, content, parentCommentId);
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     if (!user) throw new Error('Authentication required');
 
     const { data, error } = await supabase
@@ -428,7 +428,7 @@ export class SupabasePostService implements IPostService {
     const q = query.trim();
     if (!q) return [];
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getSession();
     const postSelection = `
       *,
       profiles!posts_author_id_fkey(*),
