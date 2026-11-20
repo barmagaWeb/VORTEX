@@ -158,9 +158,9 @@ export const AdminPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-[100dvh]">
+    <div className="mx-auto flex w-full max-w-7xl flex-col min-h-[100dvh]">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border p-4 space-y-3">
+      <div className="sticky top-0 z-20 bg-surface/90 backdrop-blur-md border-b border-border px-3 py-3 sm:px-6 sm:py-4 lg:px-8 space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <ShieldCheck className="w-6 h-6 text-primary" />
@@ -184,7 +184,7 @@ export const AdminPage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-6 space-y-6">
+      <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-8 space-y-5 sm:space-y-7">
         {loadError && (
           <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-red-700 dark:text-danger">
             {loadError}
@@ -198,10 +198,10 @@ export const AdminPage: React.FC = () => {
         {/* Overview Tab */}
         {activeTab === 'overview' && metrics && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-surface border border-border">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4">
+              <div className="min-w-0 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border">
                 <span className="text-xs text-fg-muted font-medium block">{t('totalUsers')}</span>
-                <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
+                <span className="text-lg sm:text-xl lg:text-2xl font-black leading-tight text-fg mt-1.5 block tabular-nums">
                   {metrics.totalUsers.toLocaleString()}
                 </span>
                 <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminRegisteredAccounts')}</span>
@@ -225,7 +225,7 @@ export const AdminPage: React.FC = () => {
 
               <div className="p-4 rounded-2xl bg-surface border border-border">
                 <span className="text-xs text-fg-muted font-medium block">{t('pendingReportsCount')}</span>
-                <span className="text-xl sm:text-2xl font-black text-danger-text mt-1 block">
+                <span className="text-lg sm:text-xl lg:text-2xl font-black leading-tight text-danger-text mt-1.5 block tabular-nums">
                   {reports.filter((r) => r.status === 'pending').length}
                 </span>
                 <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminNeedsAttention')}</span>
@@ -233,7 +233,7 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Quick Action Queue preview */}
-            <div className="p-5 rounded-2xl bg-surface border border-border space-y-3">
+            <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-surface border border-border space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-fg flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-warning" />
@@ -286,7 +286,7 @@ export const AdminPage: React.FC = () => {
         {activeTab === 'users' && (
           <div className="space-y-4">
             <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
-              <table className="w-full text-start text-xs text-fg-muted">
+              <table className="w-full min-w-[620px] text-start text-xs text-fg-muted">
                 <thead className="bg-bg text-fg-muted border-b border-border uppercase tracking-wider text-[10px]">
                   <tr>
                     <th className="p-3.5 text-start">{t('colUser')}</th>
@@ -355,7 +355,7 @@ export const AdminPage: React.FC = () => {
                 {reports.map((rep) => (
                   <div
                     key={rep.id}
-                    className="p-4 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -401,7 +401,7 @@ export const AdminPage: React.FC = () => {
         )}
 
         {activeTab === 'admins' && isSuperAdmin && (
-          <section className="max-w-3xl rounded-2xl border border-border bg-surface p-5 space-y-5">
+          <section className="w-full max-w-3xl rounded-xl sm:rounded-2xl border border-border bg-surface p-4 sm:p-6 space-y-4 sm:space-y-5">
             <div className="space-y-1">
               <h2 className="text-base font-bold text-fg">{t('adminAccess')}</h2>
               <p className="text-sm text-fg-muted">{t('adminAccessDescription')}</p>
@@ -443,7 +443,7 @@ export const AdminPage: React.FC = () => {
 
         {/* Audit Log Tab */}
         {activeTab === 'audit' && (
-          <div className="p-4 rounded-2xl bg-surface border border-border space-y-3">
+          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-surface border border-border space-y-3 sm:space-y-4">
             <h3 className="text-sm font-bold text-fg">{t('adminAuditTitle')}</h3>
             <div className="divide-y divide-border">
               {auditLogs.map((log) => (
