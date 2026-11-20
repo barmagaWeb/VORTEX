@@ -89,9 +89,9 @@ export const VerifyEmailPage: React.FC = () => {
   const handleVerifyCode = async (event: React.FormEvent) => {
     event.preventDefault();
     const normalizedEmail = email.trim().toLowerCase();
-    const normalizedCode = code.replace(/\D/g, '').slice(0, 6);
-    if (!normalizedEmail || normalizedCode.length !== 6) {
-      setError(language === 'ar' ? 'اكتب البريد الإلكتروني ورمز التحقق المكوّن من 6 أرقام.' : 'Enter your email and the 6-digit verification code.');
+    const normalizedCode = code.replace(/\D/g, '').slice(0, 8);
+    if (!normalizedEmail || normalizedCode.length !== 8) {
+      setError(language === 'ar' ? 'اكتب البريد الإلكتروني ورمز التحقق المكوّن من 8 أرقام.' : 'Enter your email and the 8-digit verification code.');
       return;
     }
 
@@ -172,19 +172,19 @@ export const VerifyEmailPage: React.FC = () => {
 
           <form onSubmit={handleVerifyCode} className="space-y-3">
             <label htmlFor="vortex-email-code" className="block text-xs font-semibold text-fg-muted">
-              {language === 'ar' ? 'كود التحقق المكوّن من 6 أرقام' : '6-digit verification code'}
+              {language === 'ar' ? 'كود التحقق المكوّن من 8 أرقام' : '8-digit verification code'}
             </label>
             <input
               id="vortex-email-code"
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              pattern="[0-9]{6}"
-              maxLength={6}
+              pattern="[0-9]{8}"
+              maxLength={8}
               value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="123456"
-              className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-center text-xl font-bold tracking-[0.45em] text-fg outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+              onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 8))}
+              placeholder="12345678"
+              className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-center text-xl font-bold tracking-[0.3em] text-fg outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               aria-label={language === 'ar' ? 'كود التحقق' : 'Verification code'}
               required
             />
