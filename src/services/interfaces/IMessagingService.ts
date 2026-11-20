@@ -44,4 +44,7 @@ export interface IMessagingService {
 
   /** Subscribe to inserts for one conversation. Always return an unsubscribe function. */
   subscribeToMessages(conversationId: string, onMessage: (message: Message) => void): () => void;
+
+  /** Subscribe to inserts visible to the current user across their inbox. */
+  subscribeToInboxMessages(onMessage: (message: Message) => void): () => void;
 }
