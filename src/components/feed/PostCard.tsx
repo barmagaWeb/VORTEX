@@ -42,6 +42,9 @@ export const PostCard: React.FC<PostCardProps> = ({
   const [isReposted, setIsReposted] = useState(post.isReposted || false);
   const [repostsCount, setRepostsCount] = useState(post.repostsCount || 0);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked || false);
+  const [likePending, setLikePending] = useState(false);
+  const [repostPending, setRepostPending] = useState(false);
+  const [bookmarkPending, setBookmarkPending] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
   const [showMenu, setShowMenu] = useState(false);
@@ -53,36 +56,71 @@ export const PostCard: React.FC<PostCardProps> = ({
   const isAuthor = user?.id === post.author.id;
 
   const handleToggleLike = async () => {
+    if (likePending) return;
+    const previousLiked = isLiked;
+    const previousCount = likesCount;
+    const nextLiked = !previousLiked;
+
+    // Update the interface immediately; persist the change in the background.
+    setIsLiked(nextLiked);
+    setLikesCount(Math.max(0, previousCount + (nextLiked ? 1 : -1)));
+    setLikePending(true);
+
     try {
       const res = await postService.toggleLike(post.id);
       setIsLiked(res.isLiked);
       setLikesCount(res.likesCount);
-      if (res.isLiked) {
-        showToast(t('toastPostLiked'));
-      }
+      if (res.isLiked) showToast(t('toastPostLiked'));
     } catch {
+      setIsLiked(previousLiked);
+      setLikesCount(previousCount);
       showToast(t('toastLikeFailed'), 'error');
+    } finally {
+      setLikePending(false);
     }
   };
 
   const handleToggleRepost = async () => {
+    if (repostPending) return;
+    const previousReposted = isReposted;
+    const previousCount = repostsCount;
+    const nextReposted = !previousReposted;
+
+    setIsReposted(nextReposted);
+    setRepostsCount(Math.max(0, previousCount + (nextReposted ? 1 : -1)));
+    setRepostPending(true);
+
     try {
       const res = await postService.toggleRepost(post.id);
       setIsReposted(res.isReposted);
       setRepostsCount(res.repostsCount);
       showToast(res.isReposted ? t('toastReposted') : t('toastRepostRemoved'));
     } catch {
+      setIsReposted(previousReposted);
+      setRepostsCount(previousCount);
       showToast(t('toastRepostFailed'), 'error');
+    } finally {
+      setRepostPending(false);
     }
   };
 
   const handleToggleBookmark = async () => {
+    if (bookmarkPending) return;
+    const previousBookmarked = isBookmarked;
+    const nextBookmarked = !previousBookmarked;
+
+    setIsBookmarked(nextBookmarked);
+    setBookmarkPending(true);
+
     try {
       const bookmarked = await postService.toggleBookmark(post.id);
       setIsBookmarked(bookmarked);
       showToast(bookmarked ? t('toastBookmarkSaved') : t('toastBookmarkRemoved'));
     } catch {
+      setIsBookmarked(previousBookmarked);
       showToast(t('toastBookmarkFailed'), 'error');
+    } finally {
+      setBookmarkPending(false);
     }
   };
 
