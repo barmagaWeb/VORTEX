@@ -26,5 +26,5 @@ export interface INotificationService {
    * Returns count of unread notifications.
    */
   getUnreadCount(): Promise<number>;
-  subscribeToNotifications(onChange: () => void): () => void;
+  subscribeToNotifications(onChange: (type?: NotificationItem['type']) => void): () => void;
 }
