@@ -10,7 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 
 export const SignUpPage: React.FC = () => {
-  const { register, setPendingVerificationEmail, resendVerificationEmail } = useAuth();
+  const { register, login, setPendingVerificationEmail, resendVerificationEmail } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
@@ -49,18 +49,41 @@ export const SignUpPage: React.FC = () => {
       const message = signupError instanceof Error ? signupError.message : '';
       if (message.includes('An account with this email already exists')) {
         const normalizedEmail = email.trim().toLowerCase();
+
+        // First distinguish an already-confirmed account from an unverified one.
+        // Supabase can return HTTP 200 for resend without sending anything when
+        // the address is already confirmed, so do not show a false success.
         try {
-          // An existing unverified account will not receive a new message from
-          // signUp(). Explicitly request a fresh confirmation email instead.
-          await resendVerificationEmail(normalizedEmail);
-          setPendingVerificationEmail(normalizedEmail);
-          showToast(t('verificationEmailSent'));
-          navigate('/auth/verify');
-        } catch (resendError) {
-          const resendMessage = resendError instanceof Error
-            ? resendError.message
-            : t('verificationSendFailed');
-          setError(resendMessage);
+          const existingUser = await login(normalizedEmail, password);
+          showToast(t('authSuccessLogin'));
+          navigate(existingUser.emailVerified === false ? '/auth/verify' : '/feed', { replace: true });
+          return;
+        } catch (loginError) {
+          const loginMessage = loginError instanceof Error ? loginError.message : '';
+          if (/email not confirmed/i.test(loginMessage)) {
+            try {
+              await resendVerificationEmail(normalizedEmail);
+              setPendingVerificationEmail(normalizedEmail);
+              showToast(t('verificationEmailSent'));
+              navigate('/auth/verify');
+            } catch (resendError) {
+              const resendMessage = resendError instanceof Error
+                ? resendError.message
+                : t('verificationSendFailed');
+              setError(resendMessage);
+            }
+            return;
+          }
+
+          if (/invalid login credentials|invalid email or password/i.test(loginMessage)) {
+            setError(language === 'ar'
+              ? 'هذا البريد مسجل بالفعل. سجّل الدخول أو استخدم خيار استعادة كلمة المرور.'
+              : 'An account with this email already exists. Sign in or use password recovery.');
+          } else {
+            setError(loginMessage || (language === 'ar'
+              ? 'هذا البريد مسجل بالفعل. سجّل الدخول أو استخدم خيار استعادة كلمة المرور.'
+              : 'An account with this email already exists. Sign in or use password recovery.'));
+          }
         }
         return;
       }
