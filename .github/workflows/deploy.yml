@@ -36,6 +36,17 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
+      - name: Package complete source project
+        run: git archive --format=zip --output=VORTEX-source.zip HEAD
+
+      - name: Upload source project archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: VORTEX-source
+          path: VORTEX-source.zip
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
