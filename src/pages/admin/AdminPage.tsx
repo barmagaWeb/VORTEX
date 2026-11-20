@@ -368,12 +368,12 @@ export const AdminPage: React.FC = () => {
                       <p className="min-w-0 whitespace-pre-wrap break-words text-xs text-fg italic bg-bg p-2.5 rounded-xl border border-border">
                         "{rep.reportedItemSnippet}"
                       </p>
-                      <span className="text-[11px] text-fg-muted block">
+                      <span className="text-[11px] text-fg-muted block break-words">
                         Reported by: @{rep.reportedByUser.username} · Details: {rep.details || 'None provided'}
                       </span>
                     </div>
 
-                    {can('reports.manage') && <div className="flex items-center gap-2 shrink-0">
+                    {can('reports.manage') && <div className="flex flex-wrap items-center gap-2 shrink-0">
                       <Button
                         onClick={() => handleResolveReport(rep.id, 'dismiss')}
                         variant="secondary"
