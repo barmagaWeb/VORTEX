@@ -55,7 +55,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <div className="relative">
           <Bell className="w-5 h-5" />
           {unreadNotifsCount > 0 && (
-            <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-surface" />
+            <span className="absolute -top-2 -end-2 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] leading-4 text-center font-bold ring-2 ring-surface">
+              {unreadNotifsCount > 99 ? '99+' : unreadNotifsCount}
+            </span>
           )}
         </div>
         <span className="text-[10px] mt-0.5 font-medium">{t('notifications')}</span>
