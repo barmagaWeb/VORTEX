@@ -8,10 +8,12 @@ import { userService } from '../../services';
 import { User } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const RightSidebar: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { isAdmin } = useAuth();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
@@ -226,7 +228,7 @@ export const RightSidebar: React.FC = () => {
         <Link to="/settings" className="hover:underline">{t('privacy')}</Link>
         <Link to="/settings" className="hover:underline">{t('terms')}</Link>
         <Link to="/explore" className="hover:underline">{t('explore')}</Link>
-        <Link to="/admin" className="hover:underline">{t('admin')}</Link>
+        {isAdmin && <Link to="/admin" className="hover:underline">{t('admin')}</Link>}
         <span className="w-full mt-1 text-fg-subtle/80">{t('copyrightShort')}</span>
       </footer>
     </aside>
