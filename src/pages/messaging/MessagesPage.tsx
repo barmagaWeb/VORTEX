@@ -11,7 +11,7 @@ import { ConversationMember } from '../../services/interfaces/IMessagingService'
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { getChatPreferences, playVortexNotificationSound } from '../../services/notificationPreferences';
+import { getChatPreferences, getNotificationPreferences, playVortexNotificationSound } from '../../services/notificationPreferences';
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
@@ -130,7 +130,10 @@ export const MessagesPage: React.FC = () => {
         ? current
         : [...current, message]);
       if (message.senderId !== user?.id) {
-        if (getChatPreferences().incomingSound) playVortexNotificationSound();
+        const chatSoundEnabled = getChatPreferences().incomingSound;
+        const notificationPreferences = getNotificationPreferences();
+        const generalMessageSoundEnabled = notificationPreferences.soundEnabled && notificationPreferences.categories.message;
+        if (chatSoundEnabled && !generalMessageSoundEnabled) playVortexNotificationSound(notificationPreferences.soundVolume);
         void messagingService.markConversationAsRead(activeConv.id).then(() => {
           window.dispatchEvent(new CustomEvent('vortex:messages_read'));
         }).catch((error: unknown) => {
