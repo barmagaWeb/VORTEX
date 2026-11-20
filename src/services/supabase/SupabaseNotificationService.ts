@@ -157,11 +157,11 @@ export class SupabaseNotificationService implements INotificationService {
       channel = supabase
         .channel(`vortex-notifications-${user.id}-${crypto.randomUUID()}`)
         .on('postgres_changes', {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
-        }, onChange)
+        }, (payload) => onChange((payload.new as { type?: NotificationItem['type'] }).type))
         .subscribe();
     }).catch((error: unknown) => console.error('VORTEX notification subscription failed', error));
 
