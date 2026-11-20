@@ -45,7 +45,7 @@ export class MockNotificationService implements INotificationService {
     const list = this.getNotifsStore();
     return list.filter((n) => !n.isRead).length;
   }
-  subscribeToNotifications(_onChange: () => void): () => void {
+  subscribeToNotifications(_onChange: (type?: NotificationItem['type']) => void): () => void {
     return () => undefined;
   }
 }
