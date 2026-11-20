@@ -134,6 +134,11 @@ export class SupabasePostService implements IPostService {
       query = query.order('created_at', { ascending: false }).order('id', { ascending: false });
     }
 
+    // Always present the newest posts first, including RPC-backed feeds.
+    if (tab !== 'latest') {
+      query = query.order('created_at', { ascending: false }).order('id', { ascending: false });
+    }
+
     query = this.filterInteractionRowsToCurrentUser(query, user?.id);
     const { data, error } = await query.limit(30);
     if (error) throw new Error(`Unable to load feed: ${error.message}`);
