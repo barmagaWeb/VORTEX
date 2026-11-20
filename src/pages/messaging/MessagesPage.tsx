@@ -11,6 +11,7 @@ import { ConversationMember } from '../../services/interfaces/IMessagingService'
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { getChatPreferences, playVortexNotificationSound } from '../../services/notificationPreferences';
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
@@ -106,7 +107,7 @@ export const MessagesPage: React.FC = () => {
     };
     void loadMessages();
 
-    const unsubscribe = messagingService.subscribeToInboxMessages((message) => {
+    const unsubscribe = messagingService.subscribeToMessages(activeConv.id, (message) => {
       setConversations((current) => {
         const index = current.findIndex((conversation) => conversation.id === message.conversationId);
         if (index < 0) {
@@ -129,6 +130,7 @@ export const MessagesPage: React.FC = () => {
         ? current
         : [...current, message]);
       if (message.senderId !== user?.id) {
+        if (getChatPreferences().incomingSound) playVortexNotificationSound();
         void messagingService.markConversationAsRead(activeConv.id).then(() => {
           window.dispatchEvent(new CustomEvent('vortex:messages_read'));
         }).catch((error: unknown) => {
@@ -137,16 +139,20 @@ export const MessagesPage: React.FC = () => {
       }
     });
 
-    const interval = window.setInterval(() => { void loadMessages(); }, isSupabaseConfigured() ? 30000 : 5000);
+    // Supabase Realtime is the live transport. Avoid polling and re-fetching the
+    // entire thread every 30 seconds; mock mode has no realtime transport.
+    const interval = isSupabaseConfigured()
+      ? undefined
+      : window.setInterval(() => { void loadMessages(); }, 5000);
     return () => {
       active = false;
       unsubscribe();
-      window.clearInterval(interval);
+      if (interval !== undefined) window.clearInterval(interval);
     };
   }, [activeConv?.id, refreshConversations, showToast, user?.id]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
   }, [messages]);
 
   useEffect(() => {
@@ -463,13 +469,13 @@ export const MessagesPage: React.FC = () => {
             )}
           </div>
 
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6 space-y-3 sm:space-y-4">
+          <div className={`flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6 ${getChatPreferences().compactMode ? 'space-y-1.5' : 'space-y-3 sm:space-y-4'}`}>
             {messages.map((message) => {
               const isMine = message.senderId === user?.id || (!user && message.senderId === 'usr_me');
               return (
                 <div key={message.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
                   {!isMine && <Avatar src={activeConv.participant.avatar} alt={activeConv.participant.name} size="xs" />}
-                  <div className={`max-w-[88%] sm:max-w-xl lg:max-w-2xl rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
+                  <div className={`max-w-[88%] sm:max-w-xl lg:max-w-2xl rounded-2xl ${getChatPreferences().compactMode ? 'px-3 py-1.5' : 'px-4 py-2.5'} text-xs sm:text-sm leading-relaxed shadow-sm ${
                     isMine
                       ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-ee-none'
                       : 'bg-surface-elevated text-fg rounded-es-none border border-border'
@@ -532,6 +538,14 @@ export const MessagesPage: React.FC = () => {
               type="text"
               value={inputMessage}
               onChange={(event) => setInputMessage(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey && getChatPreferences().enterToSend) {
+                  event.preventDefault();
+                  if (inputMessage.trim() || pendingAttachments.length) {
+                    void handleSendMessage(event as unknown as React.FormEvent);
+                  }
+                }
+              }}
               placeholder={t('typeMessage')}
               maxLength={5000}
               disabled={isSending}
