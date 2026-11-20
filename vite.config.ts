@@ -1,10 +1,36 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { execSync } from 'node:child_process';
+
+// Use the exact commit being deployed as the version checked by open browser tabs.
+const buildVersion = (() => {
+  const fromEnvironment = process.env.CF_PAGES_COMMIT_SHA || process.env.GITHUB_SHA || process.env.VORTEX_BUILD_VERSION;
+  if (fromEnvironment) return fromEnvironment.slice(0, 12);
+  try {
+    return execSync('git rev-parse --short=12 HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  } catch {
+    return `local-${Date.now()}`;
+  }
+})();
+
+const versionAssetPlugin: Plugin = {
+  name: 'vortex-version-asset',
+  generateBundle() {
+    this.emitFile({
+      type: 'asset',
+      fileName: 'version.json',
+      source: JSON.stringify({ version: buildVersion }),
+    });
+  },
+};
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __VORTEX_BUILD_VERSION__: JSON.stringify(buildVersion),
+  },
   plugins: [react(), versionAssetPlugin],
   resolve: {
     alias: {
