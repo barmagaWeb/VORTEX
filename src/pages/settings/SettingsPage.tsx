@@ -5,6 +5,7 @@ import {
   Palette,
   Globe,
   Bell,
+  MessageCircle,
   Ban,
   Check,
   Moon,
@@ -23,6 +24,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { settingsService } from '../../services/supabase/SupabaseSettingsService';
 import type { BlockedAccount, UserSettings } from '../../services/supabase/SupabaseSettingsService';
+import {
+  getNotificationPreferences, saveNotificationPreferences, playVortexNotificationSound,
+  getChatPreferences, saveChatPreferences,
+  type NotificationPreferences, type ChatPreferences, type VortexNotificationType,
+} from '../../services/notificationPreferences';
 
 export const SettingsPage: React.FC = () => {
   const { user, updateUser } = useAuth();
@@ -31,7 +37,7 @@ export const SettingsPage: React.FC = () => {
   const { showToast } = useToast();
 
   const [activeSection, setActiveSection] = useState<
-    'profile' | 'appearance' | 'language' | 'privacy' | 'notifications' | 'blocked'
+    'profile' | 'appearance' | 'language' | 'privacy' | 'notifications' | 'chat' | 'blocked'
   >('appearance');
 
   // Profile fields
@@ -44,6 +50,8 @@ export const SettingsPage: React.FC = () => {
   const [isPrivate, setIsPrivate] = useState(user?.isPrivate || false);
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [pushNotifs, setPushNotifs] = useState(true);
+  const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>(() => getNotificationPreferences());
+  const [chatPrefs, setChatPrefs] = useState<ChatPreferences>(() => getChatPreferences());
   const [blockedUsers, setBlockedUsers] = useState<BlockedAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -62,6 +70,8 @@ export const SettingsPage: React.FC = () => {
         setLanguage(settings.language);
         setEmailNotifs(settings.emailNotifications);
         setPushNotifs(settings.pushNotifications);
+        setNotificationPrefs(getNotificationPreferences());
+        setChatPrefs(getChatPreferences());
         setIsPrivate(user?.isPrivate ?? settings.isPrivate);
         setBlockedUsers(blocked);
       } catch (error) {
@@ -86,6 +96,8 @@ export const SettingsPage: React.FC = () => {
     setIsSaving(true);
     try {
       await settingsService.saveSettings(currentSettings());
+      saveNotificationPreferences(notificationPrefs);
+      saveChatPreferences(chatPrefs);
       showToast(t('preferencesSaved'));
     } catch (error) {
       showToast(error instanceof Error ? error.message : t('errSavePreferencesFailed'), 'error');
@@ -126,6 +138,7 @@ export const SettingsPage: React.FC = () => {
     { id: 'profile', label: t('profileSettings'), icon: User },
     { id: 'privacy', label: t('privacySettings'), icon: Shield },
     { id: 'notifications', label: t('notificationSettings'), icon: Bell },
+    { id: 'chat', label: language === 'ar' ? 'إعدادات المحادثات' : 'Chat preferences', icon: MessageCircle },
     { id: 'blocked', label: t('blockedSettings'), icon: Ban },
   ] as const;
 
@@ -408,33 +421,69 @@ export const SettingsPage: React.FC = () => {
               <div className="space-y-3">
                 <label className="flex items-center justify-between p-3.5 rounded-xl bg-bg border border-border cursor-pointer">
                   <span className="text-xs font-semibold text-fg">{t('emailNotifications')}</span>
-                  <input
-                    type="checkbox"
-                    checked={emailNotifs}
-                    onChange={(e) => setEmailNotifs(e.target.checked)}
-                    className="accent-primary w-4 h-4 cursor-pointer"
-                  />
+                  <input type="checkbox" checked={emailNotifs} onChange={(e) => setEmailNotifs(e.target.checked)} className="accent-primary w-4 h-4 cursor-pointer" />
                 </label>
-
                 <label className="flex items-center justify-between p-3.5 rounded-xl bg-bg border border-border cursor-pointer">
                   <span className="text-xs font-semibold text-fg">{t('pushNotifications')}</span>
-                  <input
-                    type="checkbox"
-                    checked={pushNotifs}
-                    onChange={(e) => setPushNotifs(e.target.checked)}
-                    className="accent-primary w-4 h-4 cursor-pointer"
-                  />
+                  <input type="checkbox" checked={pushNotifs} onChange={(e) => setPushNotifs(e.target.checked)} className="accent-primary w-4 h-4 cursor-pointer" />
                 </label>
 
-                <Button
-                  onClick={handleSavePreferences}
-                  variant="primary"
-                  size="md"
-                  disabled={isSaving}
-                >
+                <section className="rounded-xl border border-border bg-bg p-4 space-y-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-bold text-fg">{language === 'ar' ? 'صوت الإشعارات' : 'Notification sound'}</h3>
+                      <p className="text-[11px] text-fg-subtle mt-1">{language === 'ar' ? 'تشغيل نغمة عند وصول إشعار جديد أثناء فتح الموقع' : 'Play a tone when a new notification arrives while the site is open'}</p>
+                    </div>
+                    <input aria-label="Enable notification sound" type="checkbox" checked={notificationPrefs.soundEnabled} onChange={(e) => setNotificationPrefs((p) => ({ ...p, soundEnabled: e.target.checked }))} className="accent-primary w-4 h-4" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs"><label htmlFor="vortex-sound-volume" className="text-fg-muted">{language === 'ar' ? 'مستوى الصوت' : 'Volume'}</label><span className="text-fg-subtle tabular-nums">{Math.round(notificationPrefs.soundVolume * 100)}%</span></div>
+                    <input id="vortex-sound-volume" type="range" min="0" max="1" step="0.05" value={notificationPrefs.soundVolume} onChange={(e) => setNotificationPrefs((p) => ({ ...p, soundVolume: Number(e.target.value) }))} disabled={!notificationPrefs.soundEnabled} className="w-full accent-primary disabled:opacity-40" />
+                    <button type="button" onClick={() => playVortexNotificationSound(notificationPrefs.soundVolume)} disabled={!notificationPrefs.soundEnabled} className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-fg hover:bg-surface-hover disabled:opacity-40">{language === 'ar' ? 'تجربة الصوت' : 'Test sound'}</button>
+                  </div>
+                  <div className="border-t border-border pt-3 space-y-2">
+                    <h3 className="text-xs font-bold text-fg">{language === 'ar' ? 'أنواع الإشعارات التي تصدر صوتاً' : 'Notification types with sound'}</h3>
+                    {([
+                      ['like', language === 'ar' ? 'الإعجابات' : 'Likes'],
+                      ['comment', language === 'ar' ? 'التعليقات' : 'Comments'],
+                      ['reply', language === 'ar' ? 'الردود' : 'Replies'],
+                      ['follow', language === 'ar' ? 'المتابعات' : 'New followers'],
+                      ['repost', language === 'ar' ? 'إعادة النشر' : 'Reposts'],
+                      ['message', language === 'ar' ? 'الرسائل' : 'Messages'],
+                      ['community', language === 'ar' ? 'المجتمعات' : 'Communities'],
+                      ['mention', language === 'ar' ? 'الإشارات إليك' : 'Mentions'],
+                    ] as Array<[VortexNotificationType, string]>).map(([type, label]) => (
+                      <label key={type} className="flex items-center justify-between py-1.5 text-xs text-fg-muted">
+                        <span>{label}</span>
+                        <input type="checkbox" checked={notificationPrefs.categories[type]} onChange={(e) => setNotificationPrefs((p) => ({ ...p, categories: { ...p.categories, [type]: e.target.checked } }))} className="accent-primary" />
+                      </label>
+                    ))}
+                  </div>
+                </section>
+                <Button onClick={handleSavePreferences} variant="primary" size="md" disabled={isSaving}>
                   {isSaving ? t('saving') : t('savePreferences')}
                 </Button>
               </div>
+            </div>
+          )}
+
+          {activeSection === 'chat' && (
+            <div className="space-y-4">
+              <h2 className="text-base font-bold text-fg flex items-center gap-2"><MessageCircle className="w-5 h-5 text-primary" /><span>{language === 'ar' ? 'إعدادات المحادثات' : 'Chat preferences'}</span></h2>
+              <p className="text-xs text-fg-muted">{language === 'ar' ? 'تحكم في طريقة الكتابة وعرض الرسائل دون تغيير تصميم الموقع الأساسي.' : 'Adjust message input and density without changing the core site design.'}</p>
+              <div className="space-y-2">
+                {([
+                  ['enterToSend', language === 'ar' ? 'إرسال الرسالة بزر Enter' : 'Send messages with Enter'],
+                  ['compactMode', language === 'ar' ? 'عرض المحادثة بشكل مضغوط' : 'Use compact message spacing'],
+                  ['incomingSound', language === 'ar' ? 'صوت عند وصول رسالة جديدة' : 'Play a sound for incoming messages'],
+                ] as Array<[keyof ChatPreferences, string]>).map(([key, label]) => (
+                  <label key={key} className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-bg border border-border cursor-pointer">
+                    <span className="text-xs font-semibold text-fg">{label}</span>
+                    <input type="checkbox" checked={chatPrefs[key]} onChange={(e) => setChatPrefs((p) => ({ ...p, [key]: e.target.checked }))} className="accent-primary w-4 h-4" />
+                  </label>
+                ))}
+              </div>
+              <Button onClick={handleSavePreferences} variant="primary" size="md" disabled={isSaving}>{isSaving ? t('saving') : t('savePreferences')}</Button>
             </div>
           )}
 
