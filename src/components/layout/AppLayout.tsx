@@ -8,9 +8,10 @@ import { CreatePostModal } from '../feed/CreatePostModal';
 
 interface AppLayoutProps {
   showRightSidebar?: boolean;
+  wideContent?: boolean;
 }
 
-export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true }) => {
+export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, wideContent = false }) => {
   const [createPostOpen, setCreatePostOpen] = useState(false);
 
   return (
@@ -24,7 +25,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true })
         <LeftSidebar onOpenCreatePost={() => setCreatePostOpen(true)} />
 
         {/* Central Focus Content */}
-        <main className="flex-1 min-w-0 w-full max-w-2xl lg:max-w-3xl overflow-x-clip border-x border-border min-h-[100dvh] pb-20 md:pb-8">
+        <main className={`flex-1 min-w-0 w-full ${wideContent ? "max-w-none" : "max-w-2xl lg:max-w-3xl"} overflow-x-clip border-x border-border min-h-[100dvh] pb-20 md:pb-8`}>
           <Outlet />
         </main>
 
