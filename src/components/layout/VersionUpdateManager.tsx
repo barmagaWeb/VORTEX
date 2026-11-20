@@ -10,9 +10,10 @@ const UPDATE_ATTEMPT_KEY = 'vortex:update-attempted-version';
 const hasActiveEditor = (): boolean => {
   const active = document.activeElement;
   if (!active) return false;
-  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement) {
+  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
     return !active.disabled && !active.readOnly;
   }
+  if (active instanceof HTMLSelectElement) return !active.disabled;
   return active instanceof HTMLElement && active.isContentEditable;
 };
 
