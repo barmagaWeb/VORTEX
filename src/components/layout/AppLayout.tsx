@@ -7,6 +7,7 @@ import { MobileBottomNav } from './MobileBottomNav';
 import { CreatePostModal } from '../feed/CreatePostModal';
 import { messagingService, notificationService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { getNotificationPreferences, playVortexNotificationSound } from '../../services/notificationPreferences';
 
 interface AppLayoutProps {
   showRightSidebar?: boolean;
@@ -41,7 +42,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
 
   useEffect(() => {
     void refreshUnreadCounts();
-    const unsubscribeNotifications = notificationService.subscribeToNotifications(() => {
+    const unsubscribeNotifications = notificationService.subscribeToNotifications((type) => {
+      const preferences = getNotificationPreferences();
+      if (type && preferences.soundEnabled && preferences.categories[type]) {
+        playVortexNotificationSound(preferences.soundVolume);
+      }
       void notificationService.getUnreadCount()
         .then(setUnreadNotifsCount)
         .catch((error: unknown) => console.error('Unable to refresh notification count', error));
