@@ -96,6 +96,11 @@ export class MockMessagingService implements IMessagingService {
     storage.set(STORAGE_KEY_MESSAGES, messages);
   }
 
+  async getTotalUnreadCount(): Promise<number> {
+    const conversations = await this.getConversations();
+    return conversations.reduce((total, conversation) => total + conversation.unreadCount, 0);
+  }
+
   async getConversations(): Promise<Conversation[]> {
     return this.getConvsStore();
   }
