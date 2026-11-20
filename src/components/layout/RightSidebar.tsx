@@ -68,7 +68,7 @@ export const RightSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden xl:flex flex-col gap-5 w-80 lg:w-88 h-[100dvh] sticky top-0 px-4 py-5 overflow-y-auto no-scrollbar shrink-0 select-none">
+    <aside className="hidden xl:flex flex-col gap-5 w-72 2xl:w-80 h-[100dvh] sticky top-0 px-4 py-5 overflow-y-auto no-scrollbar shrink-0 select-none">
       {/* Search Bar */}
       <form onSubmit={handleSearchSubmit} className="relative">
         <Search className="w-4 h-4 text-fg-subtle absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />

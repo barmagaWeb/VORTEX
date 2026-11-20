@@ -7,6 +7,7 @@ import { LanguageProvider, useLanguage } from '../context/LanguageContext';
 import { AuthProvider } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
 import { isSupabaseConfigured } from '../services';
+import { VersionUpdateManager } from '../components/layout/VersionUpdateManager';
 
 class AppErrorBoundary extends React.Component<
   { children: React.ReactNode; labels: { title: string; description: string; reload: string } },
@@ -69,6 +70,7 @@ const Application: React.FC = () => {
         <AppErrorBoundary labels={{ title: t('appErrorTitle'), description: t('appErrorDescription'), reload: t('reloadApp') }}>
           <MotionConfig reducedMotion="user">
             <RouterProvider router={router} />
+            <VersionUpdateManager />
           </MotionConfig>
         </AppErrorBoundary>
       </ToastProvider>
