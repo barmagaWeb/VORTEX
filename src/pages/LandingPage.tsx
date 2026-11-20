@@ -19,7 +19,7 @@ import { useAuth } from '../context/AuthContext';
 export const LandingPage: React.FC = () => {
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -289,7 +289,7 @@ export const LandingPage: React.FC = () => {
           <Link to="/feed" className="hover:text-fg transition-colors">{t('home')}</Link>
           <Link to="/explore" className="hover:text-fg transition-colors">{t('explore')}</Link>
           <Link to="/communities" className="hover:text-fg transition-colors">{t('communities')}</Link>
-          <Link to="/admin" className="hover:text-fg transition-colors">{t('admin')}</Link>
+          {isAdmin && <Link to="/admin" className="hover:text-fg transition-colors">{t('admin')}</Link>}
         </div>
         <span>{t('footerRights')}</span>
       </footer>
