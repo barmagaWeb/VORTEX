@@ -234,7 +234,7 @@ export const AdminPage: React.FC = () => {
 
             {/* Quick Action Queue preview */}
             <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-surface border border-border space-y-3 sm:space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-fg flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-warning" />
                   <span>{t('adminPendingItems')}</span>
@@ -300,7 +300,7 @@ export const AdminPage: React.FC = () => {
                   {users.map((u) => (
                     <tr key={u.id} className="hover:bg-surface-hover/60">
                       <td className="p-3.5">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex min-w-0 items-center gap-2.5">
                           <Avatar src={u.avatar} alt={u.name} size="sm" />
                           <div className="flex flex-col min-w-0">
                             <span className="font-bold text-fg truncate">{u.name}</span>
@@ -336,6 +336,7 @@ export const AdminPage: React.FC = () => {
                         >
                           {u.isBlocked ? t('unsuspendUser') : t('suspendUser')}
                         </Button>}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -357,8 +358,8 @@ export const AdminPage: React.FC = () => {
                     key={rep.id}
                     className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span className="text-xs font-bold text-danger-text">{rep.reason}</span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-hover text-fg-muted capitalize">
                           {rep.status}
@@ -447,8 +448,8 @@ export const AdminPage: React.FC = () => {
             <h3 className="text-sm font-bold text-fg">{t('adminAuditTitle')}</h3>
             <div className="divide-y divide-border">
               {auditLogs.map((log) => (
-                <div key={log.id} className="py-3 flex items-center justify-between text-xs">
-                  <div>
+                <div key={log.id} className="min-w-0 py-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 text-xs">
+                  <div className="min-w-0 break-words">
                     <span className="font-bold text-fg">{log.adminName}</span>
                     <span className="text-fg-muted mx-1.5">—</span>
                     <span className="text-fg-muted">{log.action}</span>
