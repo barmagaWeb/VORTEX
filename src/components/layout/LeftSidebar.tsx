@@ -37,7 +37,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   unreadNotifsCount = 0,
   unreadMessagesCount = 0,
 }) => {
-  const { user, logout, switchRole } = useAuth();
+  const { user, logout, switchRole, isAdmin } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
 
@@ -64,12 +64,12 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
       icon: UserIcon,
     },
     { label: t('settings'), path: '/settings', icon: Settings },
-    {
+    ...(isAdmin ? [{
       label: t('admin'),
       path: '/admin',
       icon: ShieldCheck,
       highlight: true,
-    },
+    }] : []),
   ];
 
   return (
