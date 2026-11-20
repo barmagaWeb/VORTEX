@@ -160,9 +160,9 @@ export const AdminPage: React.FC = () => {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col min-h-[100dvh]">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-surface/90 backdrop-blur-md border-b border-border px-3 py-3 sm:px-6 sm:py-4 lg:px-8 space-y-3 sm:space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+      <div className="sticky top-0 z-20 min-w-0 bg-surface/95 backdrop-blur-md border-b border-border px-3 py-3 sm:px-6 sm:py-4 lg:px-8 space-y-3 sm:space-y-4">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
             <ShieldCheck className="w-6 h-6 text-primary" />
             <div>
               <h1 className="text-lg font-black text-fg">{t('adminDashboard')}</h1>
@@ -184,7 +184,7 @@ export const AdminPage: React.FC = () => {
       </div>
 
       {/* Content */}
-      <div className="px-3 py-4 sm:px-6 sm:py-6 lg:px-8 space-y-5 sm:space-y-7">
+      <div className="min-w-0 px-3 py-4 sm:px-6 sm:py-6 lg:px-8 space-y-5 sm:space-y-7 [&_*]:[overflow-wrap:anywhere]">
         {loadError && (
           <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-red-700 dark:text-danger">
             {loadError}
@@ -207,7 +207,7 @@ export const AdminPage: React.FC = () => {
                 <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminRegisteredAccounts')}</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-surface border border-border">
+              <div className="min-w-0 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border">
                 <span className="text-xs text-fg-muted font-medium block">{t('activeToday')}</span>
                 <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
                   {metrics.activeToday == null ? '—' : metrics.activeToday.toLocaleString()}
@@ -253,7 +253,7 @@ export const AdminPage: React.FC = () => {
                   .map((rep) => (
                     <div
                       key={rep.id}
-                      className="p-3.5 rounded-xl bg-bg border border-border flex items-center justify-between gap-3 text-xs"
+                      className="min-w-0 p-3.5 rounded-xl bg-bg border border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs"
                     >
                       <div className="min-w-0">
                         <span className="font-bold text-danger-text block">{rep.reason}</span>
@@ -261,7 +261,7 @@ export const AdminPage: React.FC = () => {
                           "{rep.reportedItemSnippet}"
                         </p>
                       </div>
-                      {can('reports.manage') && <div className="flex items-center gap-2 shrink-0">
+                      {can('reports.manage') && <div className="flex flex-wrap items-center gap-2 shrink-0">
                         <button
                           onClick={() => handleResolveReport(rep.id, 'dismiss')}
                           className="px-2.5 py-1 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover"
@@ -319,7 +319,7 @@ export const AdminPage: React.FC = () => {
                           <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{t('activeStatus')}</span>
                         )}
                       </td>
-                      <td className="p-3.5 text-end [&>*+*]:ms-2">
+                      <td className="p-3.5 text-end">\n                        <div className="flex flex-wrap justify-end gap-2">
                         {can('users.verify') && <Button
                           onClick={() => handleToggleVerification(u.id, u.username)}
                           variant="outline"
@@ -365,7 +365,7 @@ export const AdminPage: React.FC = () => {
                         </span>
                         <span className="text-[10px] text-fg-subtle">{rep.createdAt}</span>
                       </div>
-                      <p className="text-xs text-fg italic bg-bg p-2.5 rounded-xl border border-border">
+                      <p className="min-w-0 whitespace-pre-wrap break-words text-xs text-fg italic bg-bg p-2.5 rounded-xl border border-border">
                         "{rep.reportedItemSnippet}"
                       </p>
                       <span className="text-[11px] text-fg-muted block">
@@ -419,7 +419,7 @@ export const AdminPage: React.FC = () => {
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {permissionOptions.map(([permission, label]) => (
-                <label key={permission} className="flex items-start gap-2.5 rounded-xl border border-border p-3 text-sm text-fg">
+                <label key={permission} className="flex min-w-0 items-start gap-2.5 rounded-xl border border-border p-3 text-sm text-fg">
                   <input
                     type="checkbox"
                     checked={selectedAdminPermissions.includes(permission)}
@@ -428,7 +428,7 @@ export const AdminPage: React.FC = () => {
                       : current.filter((item) => item !== permission))}
                     className="mt-0.5 accent-current"
                   />
-                  <span>{label}</span>
+                  <span className="min-w-0 break-words">{label}</span>
                 </label>
               ))}
             </div>
@@ -454,7 +454,7 @@ export const AdminPage: React.FC = () => {
                     <span className="text-fg-muted">{log.action}</span>
                     <span className="text-primary-text ms-1.5">({log.target})</span>
                   </div>
-                  <span className="text-[10px] text-fg-subtle">{log.timestamp}</span>
+                  <span className="shrink-0 text-[10px] text-fg-subtle break-words">{log.timestamp}</span>
                 </div>
               ))}
             </div>
