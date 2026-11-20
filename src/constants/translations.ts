@@ -102,6 +102,7 @@ export const translations = {
     websiteLabel: 'Website',
     coverPhoto: 'Cover Photo',
     avatarPhoto: 'Avatar Photo',
+    remove: 'Remove',
     privateAccountNotice: 'This account is private. Follow to see their photos and posts.',
 
     // Messaging
@@ -653,6 +654,7 @@ export const translations = {
     websiteLabel: 'الموقع الإلكتروني',
     coverPhoto: 'صورة الغلاف',
     avatarPhoto: 'الصورة الشخصية',
+    remove: 'إزالة',
     privateAccountNotice: 'هذا الحساب خاص. تابعه لرؤية صوره ومنشوراته.',
 
     // Messaging
