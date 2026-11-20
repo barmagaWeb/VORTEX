@@ -29,26 +29,31 @@ export const NotificationsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const fetchNotifs = async () => {
-    setLoading(true);
+  const fetchNotifs = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const data = await notificationService.getNotifications(activeTab);
       setNotifications(data);
       setLoadError(null);
     } catch (error) {
-      setNotifications([]);
+      if (!silent) setNotifications([]);
       setLoadError(error instanceof Error ? error.message : t('notificationsLoadFailed'));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     void fetchNotifs();
+    let refreshTimer: number | undefined;
     const unsubscribe = notificationService.subscribeToNotifications(() => {
-      void fetchNotifs();
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => { void fetchNotifs(true); }, 180);
     });
-    return unsubscribe;
+    return () => {
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
+      unsubscribe();
+    };
   }, [activeTab]);
 
   const handleMarkAsRead = async (id: string) => {
