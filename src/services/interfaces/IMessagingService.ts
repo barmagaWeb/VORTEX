@@ -11,6 +11,7 @@ export interface IMessagingService {
    * Future Supabase hook: supabase.from('conversations').select('*, participants(*), last_message(*)')
    */
   getConversations(): Promise<Conversation[]>;
+  getTotalUnreadCount(): Promise<number>;
 
   /**
    * Fetches messages for a given conversation.
