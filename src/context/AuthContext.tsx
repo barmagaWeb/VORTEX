@@ -159,7 +159,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return authService.resendConfirmationEmail(targetEmail);
   };
 
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
   const isAuthenticated = !!user && user.emailVerified !== false;
 
   return (

@@ -11,6 +11,20 @@ describe('Bilingual Localization Completeness', () => {
     expect(arKeys.length).toBeGreaterThanOrEqual(enKeys.length);
   });
 
+  it('should keep English and Arabic key sets exactly equal (no Arabic-only keys)', () => {
+    const enKeys = Object.keys(translations.en).sort();
+    const arKeys = Object.keys(translations.ar).sort();
+    expect(arKeys).toEqual(enKeys);
+  });
+
+  it('should provide NotFoundPage strings in both languages', () => {
+    const keys = ['notFoundTitle', 'notFoundDescription', 'goHome', 'goBack'] as const;
+    keys.forEach((key) => {
+      expect(translations.en[key], `en.${key}`).toBeTruthy();
+      expect(translations.ar[key], `ar.${key}`).toBeTruthy();
+    });
+  });
+
   it('should verify translations contain no empty strings', () => {
     Object.entries(translations.en).forEach(([key, val]) => {
       expect(val, `English key ${key} should not be empty`).toBeTruthy();

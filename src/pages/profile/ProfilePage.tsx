@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   MapPin,
@@ -9,6 +9,8 @@ import {
   Mail,
   UserPlus,
   UserCheck,
+  Camera,
+  X,
 } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
 import { Badge } from '../../components/ui/Badge';
@@ -23,6 +25,7 @@ import { User, Post } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../context/ToastContext';
+import { uploadMediaFile } from '../../services/supabase/storage';
 
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -43,6 +46,9 @@ export const ProfilePage: React.FC = () => {
   const [editLocation, setEditLocation] = useState('');
   const [editWebsite, setEditWebsite] = useState('');
   const [editAvatar, setEditAvatar] = useState('');
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState('');
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [editCover, setEditCover] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -106,15 +112,24 @@ export const ProfilePage: React.FC = () => {
     if (!profileUser) return;
     setIsSaving(true);
     try {
+      let avatarUrl = editAvatar;
+      if (avatarFile) {
+        if (!currentUser?.id) throw new Error('You must be signed in to upload a profile photo.');
+        const uploaded = await uploadMediaFile('avatars', avatarFile, currentUser.id);
+        avatarUrl = uploaded.url;
+      }
       const updated = await updateUser({
         name: editName,
         bio: editBio,
         location: editLocation,
         website: editWebsite,
-        avatar: editAvatar,
+        avatar: avatarUrl,
         coverImage: editCover,
       });
       setProfileUser(updated);
+      setEditAvatar(updated.avatar || '');
+      setAvatarFile(null);
+      setAvatarPreview('');
       setIsEditModalOpen(false);
       showToast(t('toastProfileUpdated'));
     } catch {
@@ -353,7 +368,7 @@ export const ProfilePage: React.FC = () => {
       {/* Edit Profile Modal */}
       <Modal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => { setIsEditModalOpen(false); setAvatarFile(null); setAvatarPreview(''); }}
         title={t('editProfile')}
         maxWidth="lg"
         footer={
@@ -391,12 +406,40 @@ export const ProfilePage: React.FC = () => {
             onChange={(e) => setEditWebsite(e.target.value)}
             placeholder="https://yourwebsite.com"
           />
-          <Input
-            label={t('avatarPhoto')}
-            value={editAvatar}
-            onChange={(e) => setEditAvatar(e.target.value)}
-            placeholder={t('imageUrlPlaceholder')}
-          />
+          <div className="space-y-2">
+            <label className="block text-sm font-semibold text-fg">{t('avatarPhoto')}</label>
+            <div className="flex items-center gap-4">
+              <Avatar src={avatarPreview || editAvatar} alt={editName || 'Profile'} size="2xl" />
+              <div className="flex flex-wrap gap-2">
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      showToast('Profile photo must be 5 MB or smaller.', 'error');
+                      event.target.value = '';
+                      return;
+                    }
+                    setAvatarFile(file);
+                    setAvatarPreview(URL.createObjectURL(file));
+                  }}
+                />
+                <Button variant="secondary" onClick={() => avatarInputRef.current?.click()} leftIcon={<Camera className="w-4 h-4" />}>
+                  {t('avatarPhoto')}
+                </Button>
+                {(avatarFile || editAvatar) && (
+                  <Button variant="ghost" onClick={() => { setAvatarFile(null); setAvatarPreview(''); setEditAvatar(''); if (avatarInputRef.current) avatarInputRef.current.value = ''; }} leftIcon={<X className="w-4 h-4" />}>
+                    {t('remove')}
+                  </Button>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-fg-muted">JPG, PNG, WebP or GIF · 5 MB max</p>
+          </div>
           <Input
             label={t('coverPhoto')}
             value={editCover}

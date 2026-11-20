@@ -211,20 +211,11 @@ export class SupabaseAuthService implements IAuthService {
       return user?.role === 'admin';
     }
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return false;
 
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role, is_suspended')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    return !error && profile?.role === 'admin' && profile.is_suspended === false;
+    const { data, error } = await supabase.rpc('has_admin_access');
+    return !error && data === true;
   }
 
   async signOut(): Promise<void> {

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { UserRound } from 'lucide-react';
 
 interface AvatarProps {
   src?: string;
@@ -35,15 +36,6 @@ export const Avatar: React.FC<AvatarProps> = ({
     '2xl': 'w-5 h-5 border-[2.5px]',
   };
 
-  const getInitials = (name: string) => {
-    if (!name) return 'V';
-    const parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
-
   return (
     <div className={`relative inline-block shrink-0 select-none ${className}`}>
       <div
@@ -58,7 +50,7 @@ export const Avatar: React.FC<AvatarProps> = ({
             loading="lazy"
           />
         ) : (
-          <span>{getInitials(alt)}</span>
+          <UserRound aria-hidden="true" className="w-1/2 h-1/2 text-white/75" strokeWidth={1.5} />
         )}
       </div>
 
