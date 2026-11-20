@@ -2,7 +2,7 @@ import { ConversationMember, IMessagingService } from '../interfaces/IMessagingS
 import { Conversation, Message, User } from '../../types';
 import { supabase, isSupabaseConfigured } from './client';
 import { MockMessagingService } from '../mock/MockMessagingService';
-import { resolveStorageUrl } from './storage';
+import { resolveStorageUrls } from './storage';
 
 interface MessageRow {
   id: string;
@@ -47,7 +47,7 @@ export class SupabaseMessagingService implements IMessagingService {
 
   private async mapMessage(row: MessageRow, currentUserId?: string): Promise<Message> {
     const attachments = Array.isArray(row.attachments) && row.attachments.length
-      ? await Promise.all(row.attachments.map((path) => resolveStorageUrl('attachments', path)))
+      ? await resolveStorageUrls('attachments', row.attachments)
       : [];
     const readByOther = (row.message_reads || []).some((receipt) => receipt.user_id !== row.sender_id);
     return {
@@ -63,7 +63,8 @@ export class SupabaseMessagingService implements IMessagingService {
 
   async getConversations(): Promise<Conversation[]> {
     if (!isSupabaseConfigured()) return this.fallbackMock.getConversations();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) return [];
 
     // The database function returns one summary per conversation, instead of
@@ -114,7 +115,8 @@ export class SupabaseMessagingService implements IMessagingService {
 
   async getMessages(conversationId: string): Promise<Message[]> {
     if (!isSupabaseConfigured()) return this.fallbackMock.getMessages(conversationId);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) throw new Error('Authentication required');
 
     // Fetch the latest page efficiently, then restore chronological order for display.
@@ -133,7 +135,8 @@ export class SupabaseMessagingService implements IMessagingService {
 
   async sendMessage(conversationId: string, content: string, attachments: string[] = []): Promise<Message> {
     if (!isSupabaseConfigured()) return this.fallbackMock.sendMessage(conversationId, content, attachments);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) throw new Error('Authentication required');
 
     const cleanContent = content.trim();
@@ -153,7 +156,8 @@ export class SupabaseMessagingService implements IMessagingService {
 
   async markConversationAsRead(conversationId: string): Promise<void> {
     if (!isSupabaseConfigured()) return this.fallbackMock.markConversationAsRead(conversationId);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) return;
     const { error } = await supabase.rpc('vortex_mark_conversation_read', {
       p_conversation_id: conversationId,
@@ -163,7 +167,8 @@ export class SupabaseMessagingService implements IMessagingService {
 
   async getOrCreateConversation(targetUserId: string): Promise<Conversation> {
     if (!isSupabaseConfigured()) return this.fallbackMock.getOrCreateConversation(targetUserId);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
     if (!user) throw new Error('Authentication required');
     if (targetUserId === user.id) throw new Error('You cannot start a conversation with yourself.');
 
