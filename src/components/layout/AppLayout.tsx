@@ -28,12 +28,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
       return;
     }
     try {
-      const [notificationCount, conversations] = await Promise.all([
+      const [notificationCount, messageCount] = await Promise.all([
         notificationService.getUnreadCount(),
-        messagingService.getConversations(),
+        messagingService.getTotalUnreadCount(),
       ]);
       setUnreadNotifsCount(notificationCount);
-      setUnreadMessagesCount(conversations.reduce((total, conversation) => total + conversation.unreadCount, 0));
+      setUnreadMessagesCount(messageCount);
     } catch (error) {
       console.error('Unable to refresh VORTEX unread counters', error);
     }
@@ -47,10 +47,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
         .catch((error: unknown) => console.error('Unable to refresh notification count', error));
     });
     const refreshMessageCount = () => {
-      void messagingService.getConversations()
-        .then((conversations) => setUnreadMessagesCount(
-          conversations.reduce((total, conversation) => total + conversation.unreadCount, 0)
-        ))
+      void messagingService.getTotalUnreadCount()
+        .then(setUnreadMessagesCount)
         .catch((error: unknown) => console.error('Unable to refresh message count', error));
     };
     const unsubscribeInbox = messagingService.subscribeToInboxMessages((message) => {
