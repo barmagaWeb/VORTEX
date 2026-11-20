@@ -98,6 +98,7 @@ export const MessagesPage: React.FC = () => {
         loadedMessageIds.current = nextIds;
         setMessages(result);
         await messagingService.markConversationAsRead(activeConv.id);
+        window.dispatchEvent(new CustomEvent('vortex:messages_read'));
         await refreshConversations();
       } catch {
         if (active) showToast(t('toastMessagesLoadFailed'), 'error');
@@ -128,7 +129,9 @@ export const MessagesPage: React.FC = () => {
         ? current
         : [...current, message]);
       if (message.senderId !== user?.id) {
-        void messagingService.markConversationAsRead(activeConv.id).catch((error: unknown) => {
+        void messagingService.markConversationAsRead(activeConv.id).then(() => {
+          window.dispatchEvent(new CustomEvent('vortex:messages_read'));
+        }).catch((error: unknown) => {
           console.error('Unable to mark active conversation as read', error);
         });
       }
