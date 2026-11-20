@@ -58,7 +58,7 @@ export const SettingsPage: React.FC = () => {
           settingsService.getBlockedAccounts(),
         ]);
         if (!active) return;
-        setTheme(settings.theme);
+        // Preserve the current app theme when Settings is opened.
         setLanguage(settings.language);
         setEmailNotifs(settings.emailNotifications);
         setPushNotifs(settings.pushNotifications);
