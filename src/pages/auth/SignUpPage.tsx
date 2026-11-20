@@ -10,7 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 
 export const SignUpPage: React.FC = () => {
-  const { register, setPendingVerificationEmail } = useAuth();
+  const { register, setPendingVerificationEmail, resendVerificationEmail } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
@@ -48,8 +48,20 @@ export const SignUpPage: React.FC = () => {
     } catch (signupError) {
       const message = signupError instanceof Error ? signupError.message : '';
       if (message.includes('An account with this email already exists')) {
-        setPendingVerificationEmail(email.trim().toLowerCase());
-        navigate('/auth/verify');
+        const normalizedEmail = email.trim().toLowerCase();
+        try {
+          // An existing unverified account will not receive a new message from
+          // signUp(). Explicitly request a fresh confirmation email instead.
+          await resendVerificationEmail(normalizedEmail);
+          setPendingVerificationEmail(normalizedEmail);
+          showToast(t('verificationEmailSent'));
+          navigate('/auth/verify');
+        } catch (resendError) {
+          const resendMessage = resendError instanceof Error
+            ? resendError.message
+            : t('verificationSendFailed');
+          setError(resendMessage);
+        }
         return;
       }
       setError(message || t('errCreateAccountFailed'));
