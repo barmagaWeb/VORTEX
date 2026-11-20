@@ -45,8 +45,9 @@ export const SignUpPage: React.FC = () => {
       const newUser = await register(email, password, name, username);
       showToast(t('authSuccessRegister'));
       navigate(newUser.emailVerified === false ? '/auth/verify' : '/feed');
-    } catch {
-      setError(t('errCreateAccountFailed'));
+    } catch (signupError) {
+      const message = signupError instanceof Error ? signupError.message : '';
+      setError(message || t('errCreateAccountFailed'));
     } finally {
       setIsLoading(false);
     }
