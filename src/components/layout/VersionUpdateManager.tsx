@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-const BUILD_VERSION = '2026.11.20.2';
+declare const __VORTEX_BUILD_VERSION__: string;
+
+const BUILD_VERSION = __VORTEX_BUILD_VERSION__;
 const VERSION_URL = '/version.json';
 const CHECK_INTERVAL_MS = 45_000;
 const UPDATE_ATTEMPT_KEY = 'vortex:update-attempted-version';
@@ -93,7 +95,6 @@ export const VersionUpdateManager: React.FC = () => {
 
   if (!waitingForSafeUpdate) return null;
 
-  const isArabic = document.documentElement.dir === 'rtl';
   return (
     <div
       role="status"
