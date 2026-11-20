@@ -350,9 +350,9 @@ export const MessagesPage: React.FC = () => {
   );
 
   return (
-    <div className="flex h-[100dvh] max-h-[100dvh] bg-bg overflow-hidden text-fg">
+    <div className="flex h-[calc(100dvh-8.5rem)] max-h-[calc(100dvh-8.5rem)] md:h-[calc(100dvh-2rem)] md:max-h-[calc(100dvh-2rem)] min-h-0 bg-bg overflow-hidden text-fg">
       {/* Conversations List Panel */}
-      <div className={`w-full md:w-80 lg:w-96 border-e border-border flex flex-col bg-surface/50 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
+      <div className={`w-full md:w-80 lg:w-[22rem] xl:w-96 min-h-0 border-e border-border flex flex-col bg-surface/50 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
         <div className="p-4 border-b border-border space-y-3">
           <div className="flex items-center justify-between gap-2">
             <h1 className="text-lg font-black text-fg">{t('messages')}</h1>
@@ -379,7 +379,7 @@ export const MessagesPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-border">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain divide-y divide-border">
           {filteredConversations.map((conversation) => {
             const isSelected = activeConv?.id === conversation.id;
             return (
@@ -413,7 +413,7 @@ export const MessagesPage: React.FC = () => {
 
       {/* Active Conversation Thread Panel */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col bg-surface/30 h-full min-w-0">
+        <div className="flex-1 flex flex-col bg-surface/30 h-full min-h-0 min-w-0">
           <div className="p-3.5 sm:px-6 border-b border-border bg-surface/85 backdrop-blur-md flex items-center gap-3">
             <button
               type="button"
@@ -440,13 +440,13 @@ export const MessagesPage: React.FC = () => {
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 sm:p-5 lg:p-6 space-y-3 sm:space-y-4">
             {messages.map((message) => {
               const isMine = message.senderId === user?.id || (!user && message.senderId === 'usr_me');
               return (
                 <div key={message.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
                   {!isMine && <Avatar src={activeConv.participant.avatar} alt={activeConv.participant.name} size="xs" />}
-                  <div className={`max-w-[82%] sm:max-w-md rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
+                  <div className={`max-w-[88%] sm:max-w-xl lg:max-w-2xl rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
                     isMine
                       ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-ee-none'
                       : 'bg-surface-elevated text-fg rounded-es-none border border-border'
@@ -486,7 +486,7 @@ export const MessagesPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-surface border-t border-border flex items-center gap-2">
+          <form onSubmit={handleSendMessage} className="shrink-0 p-2.5 sm:p-4 bg-surface border-t border-border flex items-center gap-2">
             <input ref={attachmentInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple className="hidden" onChange={(event) => void handleAttachmentUpload(event)} />
             <button
               type="button"
