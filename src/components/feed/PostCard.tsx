@@ -359,6 +359,7 @@ export const PostCard: React.FC<PostCardProps> = ({
       {/* Action buttons row */}
       <div className="flex items-center justify-between pt-2">
         <button
+          disabled={likePending}
           onClick={handleToggleLike}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors min-h-[44px] ${
             isLiked
@@ -383,6 +384,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         </button>
 
         <button
+          disabled={repostPending}
           onClick={handleToggleRepost}
           className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors min-h-[44px] ${
             isReposted
@@ -395,6 +397,7 @@ export const PostCard: React.FC<PostCardProps> = ({
         </button>
 
         <button
+          disabled={bookmarkPending}
           onClick={handleToggleBookmark}
           className={`p-2.5 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
             isBookmarked
