@@ -46,7 +46,9 @@ export const MobileTopNav: React.FC<MobileTopNavProps> = ({ unreadNotifsCount = 
           >
             <Bell className="w-5 h-5" />
             {unreadNotifsCount > 0 && (
-              <span className="absolute top-1.5 end-1.5 w-2 h-2 rounded-full bg-rose-500" />
+              <span className="absolute -top-0.5 -end-1 min-w-4 h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] leading-4 text-center font-bold ring-2 ring-surface">
+                {unreadNotifsCount > 99 ? '99+' : unreadNotifsCount}
+              </span>
             )}
           </Link>
         </div>
