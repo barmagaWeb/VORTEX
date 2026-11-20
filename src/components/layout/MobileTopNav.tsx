@@ -13,7 +13,7 @@ interface MobileTopNavProps {
 
 export const MobileTopNav: React.FC<MobileTopNavProps> = ({ unreadNotifsCount = 0 }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { user, logout, switchRole } = useAuth();
+  const { user, isAdmin, logout, switchRole } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -117,6 +117,7 @@ export const MobileTopNav: React.FC<MobileTopNavProps> = ({ unreadNotifsCount = 
                 >
                   {t('settings')}
                 </Link>
+                {isAdmin && (
                 <Link
                   to="/admin"
                   onClick={() => setDrawerOpen(false)}
@@ -125,6 +126,7 @@ export const MobileTopNav: React.FC<MobileTopNavProps> = ({ unreadNotifsCount = 
                   <span>{t('admin')}</span>
                   <ShieldCheck className="w-4 h-4" />
                 </Link>
+                )}
               </nav>
             </div>
 
