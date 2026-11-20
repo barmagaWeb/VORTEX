@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { LeftSidebar } from './LeftSidebar';
 import { RightSidebar } from './RightSidebar';
@@ -19,6 +19,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
   const userId = user?.id;
   const [unreadNotifsCount, setUnreadNotifsCount] = useState(0);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const seenInboxMessageIds = useRef<Set<string>>(new Set());
 
   const refreshUnreadCounts = useCallback(async () => {
     if (!userId) {
@@ -53,7 +54,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
         .catch((error: unknown) => console.error('Unable to refresh message count', error));
     };
     const unsubscribeInbox = messagingService.subscribeToInboxMessages((message) => {
-      if (message.senderId !== userId) refreshMessageCount();
+      if (message.senderId === userId || seenInboxMessageIds.current.has(message.id)) return;
+      seenInboxMessageIds.current.add(message.id);
+      setUnreadMessagesCount((count) => count + 1);
     });
     window.addEventListener('vortex:messages_read', refreshMessageCount);
     return () => {
