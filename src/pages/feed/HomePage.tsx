@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Sparkles, Users, Clock, RefreshCw } from 'lucide-react';
 import { CreatePostCard } from '../../components/feed/CreatePostCard';
 import { PostCard } from '../../components/feed/PostCard';
@@ -18,23 +18,29 @@ export const HomePage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasNewPosts, setHasNewPosts] = useState(false);
+  const hasLoadedFeed = useRef(false);
+  const requestVersion = useRef(0);
 
   const fetchPosts = useCallback(async () => {
-    setLoading(true);
+    const version = ++requestVersion.current;
+    if (!hasLoadedFeed.current) setLoading(true);
     try {
       const data = await postService.getFeed(activeTab);
+      if (version !== requestVersion.current) return;
       setPosts(data);
       setHasNewPosts(false);
+      hasLoadedFeed.current = true;
     } catch (error) {
+      if (version !== requestVersion.current) return;
       console.error('Failed to load feed:', error);
       showToast(t('feedLoadFailed'), 'error');
     } finally {
-      setLoading(false);
+      if (version === requestVersion.current) setLoading(false);
     }
   }, [activeTab, showToast, t]);
 
   useEffect(() => {
-    fetchPosts();
+    void fetchPosts();
   }, [fetchPosts]);
 
   useEffect(() => {
@@ -47,7 +53,7 @@ export const HomePage: React.FC = () => {
       window.clearTimeout(refreshTimer);
       unsubscribe();
     };
-  }, [fetchPosts]);
+  }, []);
 
   // Listen to global post creation events
   useEffect(() => {
