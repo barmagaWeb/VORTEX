@@ -86,6 +86,7 @@ export const MessagesPage: React.FC = () => {
     }
     let active = true;
     loadedMessageIds.current = new Set();
+    setMessages([]);
     const loadMessages = async () => {
       try {
         const result = await messagingService.getMessages(activeConv.id);
