@@ -199,11 +199,21 @@ export const VerifyEmailPage: React.FC = () => {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
+              readOnly={Boolean(pendingEmail || sent)}
+              aria-readonly={Boolean(pendingEmail || sent)}
+              className={pendingEmail || sent ? 'cursor-not-allowed opacity-70' : ''}
               placeholder="you@domain.com"
               leftIcon={<Mail className="h-4 w-4" />}
               required
             />
             {error && <p role="alert" className="text-xs font-semibold text-danger-text">{error}</p>}
+            {(pendingEmail || sent) && (
+              <p className="text-[11px] text-fg-muted">
+                {language === 'ar'
+                  ? 'لا يمكن تغيير البريد بعد إرسال رمز التحقق. ارجع للصفحة السابقة إذا كنت تريد تعديل البريد.'
+                  : 'The email cannot be changed after a verification code is sent. Go back to the previous page to edit it.'}
+              </p>
+            )}
             <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isSending} disabled={resendCooldown > 0} className="shadow-vortex-glow">
               <RefreshCw className="me-2 h-4 w-4" />
               {resendCooldown > 0
