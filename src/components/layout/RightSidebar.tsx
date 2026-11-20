@@ -49,11 +49,11 @@ export const RightSidebar: React.FC = () => {
         res.isPending
           ? t('followRequestSent')
           : res.isFollowing
-          ? `You followed ${userName}`
-          : `You unfollowed ${userName}`
+          ? t('toastFollowed', { name: userName })
+          : t('toastUnfollowed', { name: userName })
       );
     } catch {
-      showToast('Could not update follow status', 'error');
+      showToast(t('toastFollowFailed'), 'error');
     }
   };
 
@@ -66,35 +66,35 @@ export const RightSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden xl:flex flex-col gap-5 w-80 lg:w-88 h-screen sticky top-0 px-4 py-5 overflow-y-auto no-scrollbar shrink-0 select-none">
-      {/* Search Bar matching screenshot */}
+    <aside className="hidden xl:flex flex-col gap-5 w-80 lg:w-88 h-[100dvh] sticky top-0 px-4 py-5 overflow-y-auto no-scrollbar shrink-0 select-none">
+      {/* Search Bar */}
       <form onSubmit={handleSearchSubmit} className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="w-4 h-4 text-fg-subtle absolute start-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t('searchPlaceholder')}
-          className="w-full bg-slate-900/90 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-full border border-slate-800/80 hover:border-slate-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40 ps-10 pe-4 py-2.5 transition-all outline-none"
+          className="w-full bg-surface text-fg placeholder:text-fg-subtle text-xs sm:text-sm rounded-full border border-border hover:border-fg-subtle/50 focus:border-primary focus:ring-1 focus:ring-primary/40 ps-10 pe-4 py-2.5 transition-all outline-none"
         />
       </form>
 
-      {/* Trending Topics Card matching screenshot */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col gap-3">
+      {/* Trending Topics Card */}
+      <div className="p-4 rounded-2xl bg-surface border border-border shadow-card flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Flame className="w-4 h-4 text-rose-500 fill-rose-500" />
-            <h3 className="font-bold text-sm text-slate-100 tracking-tight">{t('trending')}</h3>
+            <h3 className="font-bold text-sm text-fg tracking-tight">{t('trending')}</h3>
           </div>
           <Link
             to="/explore"
-            className="text-xs font-semibold text-violet-400 hover:text-violet-300"
+            className="text-xs font-semibold text-primary-text hover:underline"
           >
             {t('viewAll')}
           </Link>
         </div>
 
-        <div className="flex flex-col divide-y divide-slate-800/60">
+        <div className="flex flex-col divide-y divide-border">
           {trendingTopics.map((topic) => (
             <Link
               key={topic.tag}
@@ -102,29 +102,29 @@ export const RightSidebar: React.FC = () => {
               className="py-2.5 flex items-center justify-between hover:opacity-85 transition-opacity group"
             >
               <div className="flex flex-col text-start">
-                <span className="text-sm font-bold text-slate-200 group-hover:text-violet-400 transition-colors">
+                <span className="text-sm font-bold text-fg group-hover:text-primary-text transition-colors" dir="ltr">
                   #{topic.tag}
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-fg-muted">
                   {topic.postsCount} {t('posts')}
                 </span>
               </div>
-              <span className="text-violet-400/80 font-mono text-sm">#</span>
+              <span className="text-primary-text font-mono text-sm">#</span>
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Suggested People Card matching screenshot */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex flex-col gap-3">
+      {/* Suggested People Card */}
+      <div className="p-4 rounded-2xl bg-surface border border-border shadow-card flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-blue-400" />
-            <h3 className="font-bold text-sm text-slate-100 tracking-tight">{t('whoToFollow')}</h3>
+            <Users className="w-4 h-4 text-blue-500" />
+            <h3 className="font-bold text-sm text-fg tracking-tight">{t('whoToFollow')}</h3>
           </div>
           <Link
             to="/explore"
-            className="text-xs font-semibold text-violet-400 hover:text-violet-300"
+            className="text-xs font-semibold text-primary-text hover:underline"
           >
             {t('viewAll')}
           </Link>
@@ -134,10 +134,10 @@ export const RightSidebar: React.FC = () => {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse flex items-center gap-3">
-                <div className="w-9 h-9 bg-slate-800 rounded-full" />
+                <div className="w-9 h-9 bg-surface-hover rounded-full" />
                 <div className="flex-1 space-y-1.5">
-                  <div className="h-3 bg-slate-800 rounded w-2/3" />
-                  <div className="h-2 bg-slate-800 rounded w-1/3" />
+                  <div className="h-3 bg-surface-hover rounded w-2/3" />
+                  <div className="h-2 bg-surface-hover rounded w-1/3" />
                 </div>
               </div>
             ))}
@@ -153,12 +153,12 @@ export const RightSidebar: React.FC = () => {
                   <Avatar src={u.avatar} alt={u.name} size="sm" />
                   <div className="flex flex-col min-w-0 text-start">
                     <div className="flex items-center gap-1">
-                      <span className="text-xs font-bold text-slate-200 group-hover:text-white truncate">
-                        {u.name}
+                      <span className="text-xs font-bold text-fg group-hover:text-primary-text transition-colors truncate">
+                        <bdi>{u.name}</bdi>
                       </span>
                       {u.verified && <Badge variant="verified" size="sm" />}
                     </div>
-                    <span className="text-[11px] text-slate-500 truncate">
+                    <span className="text-[11px] text-fg-subtle truncate" dir="ltr">
                       @{u.username}
                     </span>
                   </div>
@@ -178,22 +178,23 @@ export const RightSidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Bottom Promo Card: Join VORTEX Community matching screenshot */}
+      {/* Bottom Promo Card: Join VORTEX Community */}
       {showJoinCard && (
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-violet-500/30 flex items-center justify-between relative shadow-lg">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-violet-600/10 via-surface to-blue-600/10 border border-primary/30 flex items-center justify-between relative shadow-card">
           <button
             onClick={() => setShowJoinCard(false)}
-            className="absolute top-2.5 start-2.5 text-slate-500 hover:text-slate-300 p-1"
+            className="absolute top-2.5 start-2.5 text-fg-subtle hover:text-fg p-1"
+            aria-label={t('dismissBanner')}
           >
             <X className="w-3.5 h-3.5" />
           </button>
           <div className="flex flex-col text-start ps-3">
-            <span className="text-xs font-bold text-white">{t('joinCommunityCardTitle')}</span>
-            <span className="text-[10px] text-slate-400 mt-0.5">{t('joinCommunityCardSubtitle')}</span>
+            <span className="text-xs font-bold text-fg">{t('joinCommunityCardTitle')}</span>
+            <span className="text-[10px] text-fg-muted mt-0.5">{t('joinCommunityCardSubtitle')}</span>
             <div className="mt-2.5">
               <Button
                 onClick={() => {
-                  showToast('Welcome to the official VORTEX Community Hub! 🌟');
+                  showToast(t('toastWelcomeHub'));
                   navigate('/communities');
                 }}
                 variant="primary"
@@ -206,7 +207,7 @@ export const RightSidebar: React.FC = () => {
           </div>
           {/* Stylized V Geometric Logo */}
           <div className="w-12 h-12 flex items-center justify-center shrink-0 pe-1">
-            <svg viewBox="0 0 48 48" fill="none" className="w-full h-full drop-shadow-[0_0_10px_rgba(139,92,246,0.6)]">
+            <svg viewBox="0 0 48 48" fill="none" className="w-full h-full drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]">
               <path d="M6 8 L24 42 L30 42 L42 8 L33 8 L24 28 L15 8 Z" fill="url(#sideVortex)" />
               <defs>
                 <linearGradient id="sideVortex" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
@@ -221,12 +222,12 @@ export const RightSidebar: React.FC = () => {
       )}
 
       {/* Footer */}
-      <footer className="px-2 text-[11px] text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
-        <Link to="/settings" className="hover:underline">Privacy</Link>
-        <Link to="/settings" className="hover:underline">Terms</Link>
-        <Link to="/explore" className="hover:underline">Explore</Link>
-        <Link to="/admin" className="hover:underline">Admin</Link>
-        <span className="w-full mt-1 text-slate-600">© 2026 VORTEX Inc.</span>
+      <footer className="px-2 text-[11px] text-fg-subtle flex flex-wrap gap-x-3 gap-y-1">
+        <Link to="/settings" className="hover:underline">{t('privacy')}</Link>
+        <Link to="/settings" className="hover:underline">{t('terms')}</Link>
+        <Link to="/explore" className="hover:underline">{t('explore')}</Link>
+        <Link to="/admin" className="hover:underline">{t('admin')}</Link>
+        <span className="w-full mt-1 text-fg-subtle/80">{t('copyrightShort')}</span>
       </footer>
     </aside>
   );

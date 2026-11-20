@@ -14,35 +14,35 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full space-y-1.5 text-start">
         {label && (
-          <label htmlFor={inputId} className="block text-xs font-semibold text-slate-300">
+          <label htmlFor={inputId} className="block text-xs font-semibold text-fg-muted">
             {label}
           </label>
         )}
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute start-3.5 text-slate-400 pointer-events-none flex items-center">
+            <div className="absolute start-3.5 text-fg-subtle pointer-events-none flex items-center">
               {leftIcon}
             </div>
           )}
           <input
             id={inputId}
             ref={ref}
-            className={`w-full bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 py-2.5 ${
+            className={`w-full bg-surface text-fg placeholder:text-fg-subtle text-sm rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary py-2.5 ${
               leftIcon ? 'ps-10' : 'ps-3.5'
             } ${rightIcon ? 'pe-10' : 'pe-3.5'} ${
               error
-                ? 'border-rose-500/80 focus:ring-rose-500/50 focus:border-rose-500'
-                : 'border-slate-700/80 hover:border-slate-600'
+                ? 'border-danger/80 focus:ring-danger/40 focus:border-danger'
+                : 'border-border hover:border-fg-subtle/50'
             } ${className}`}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute end-3.5 flex items-center text-slate-400">
+            <div className="absolute end-3.5 flex items-center text-fg-subtle">
               {rightIcon}
             </div>
           )}
         </div>
-        {error && <p className="text-xs text-rose-400 font-medium">{error}</p>}
+        {error && <p className="text-xs text-danger-text font-medium">{error}</p>}
       </div>
     );
   }
@@ -62,21 +62,21 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="w-full space-y-1.5 text-start">
         {label && (
-          <label htmlFor={textareaId} className="block text-xs font-semibold text-slate-300">
+          <label htmlFor={textareaId} className="block text-xs font-semibold text-fg-muted">
             {label}
           </label>
         )}
         <textarea
           id={textareaId}
           ref={ref}
-          className={`w-full bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 p-3.5 resize-none min-h-[90px] ${
+          className={`w-full bg-surface text-fg placeholder:text-fg-subtle text-sm rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary p-3.5 resize-none min-h-[90px] ${
             error
-              ? 'border-rose-500/80 focus:ring-rose-500/50 focus:border-rose-500'
-              : 'border-slate-700/80 hover:border-slate-600'
+              ? 'border-danger/80 focus:ring-danger/40 focus:border-danger'
+              : 'border-border hover:border-fg-subtle/50'
           } ${className}`}
           {...props}
         />
-        {error && <p className="text-xs text-rose-400 font-medium">{error}</p>}
+        {error && <p className="text-xs text-danger-text font-medium">{error}</p>}
       </div>
     );
   }

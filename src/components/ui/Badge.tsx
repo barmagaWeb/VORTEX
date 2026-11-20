@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface BadgeProps {
   children?: React.ReactNode;
@@ -14,10 +15,13 @@ export const Badge: React.FC<BadgeProps> = ({
   size = 'md',
   className = '',
 }) => {
+  const { t } = useLanguage();
   if (variant === 'verified') {
     return (
       <span
-        title="Verified"
+        title={t('verifiedAccount')}
+        aria-label={t('verifiedAccount')}
+        role="img"
         className={`inline-flex items-center justify-center rounded-full bg-blue-500 text-white shrink-0 shadow-sm shadow-blue-500/50 ${
           size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'
         } ${className}`}
@@ -38,10 +42,10 @@ export const Badge: React.FC<BadgeProps> = ({
   }
 
   const variantStyles = {
-    primary: 'bg-violet-500/15 text-violet-300 border border-violet-500/30',
-    secondary: 'bg-slate-800 text-slate-300 border border-slate-700',
-    danger: 'bg-rose-500/15 text-rose-300 border border-rose-500/30',
-    success: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30',
+    primary: 'bg-primary/15 text-primary-text border border-primary/30',
+    secondary: 'bg-surface-elevated text-fg-muted border border-border',
+    danger: 'bg-danger/15 text-danger-text border border-danger/30',
+    success: 'bg-success/15 text-success border border-success/30',
   };
 
   const sizeStyles = {

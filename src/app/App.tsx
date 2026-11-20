@@ -1,5 +1,6 @@
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import { router } from './router';
 import { ThemeProvider } from '../context/ThemeContext';
 import { LanguageProvider, useLanguage } from '../context/LanguageContext';
@@ -7,9 +8,8 @@ import { AuthProvider } from '../context/AuthContext';
 import { ToastProvider } from '../context/ToastContext';
 import { isSupabaseConfigured } from '../services';
 
-
 class AppErrorBoundary extends React.Component<
-  { children: React.ReactNode; language: 'ar' | 'en' },
+  { children: React.ReactNode; labels: { title: string; description: string; reload: string } },
   { hasError: boolean }
 > {
   state = { hasError: false };
@@ -25,16 +25,20 @@ class AppErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
-      const isArabic = this.props.language === 'ar';
+      const { labels } = this.props;
       return (
-        <main className="min-h-screen bg-vortex-dark-bg text-slate-100 flex items-center justify-center p-6">
-          <section role="alert" className="w-full max-w-xl rounded-2xl border border-rose-500/30 bg-slate-900 p-6 shadow-2xl">
-            <h1 className="text-xl font-bold">{isArabic ? 'حدث خطأ غير متوقع' : 'Something went wrong'}</h1>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
-              {isArabic ? 'تعذر عرض الصفحة. أعد تحميل التطبيق للمتابعة.' : 'The page could not be rendered. Reload the app to continue.'}
+        <main className="min-h-[100dvh] bg-bg text-fg flex items-center justify-center p-6">
+          <section role="alert" className="w-full max-w-xl rounded-2xl border border-rose-500/30 bg-surface-elevated p-6 shadow-2xl">
+            <h1 className="text-xl font-bold">{labels.title}</h1>
+            <p className="mt-3 text-sm leading-7 text-fg-muted">
+              {labels.description}
             </p>
-            <button type="button" onClick={() => window.location.reload()} className="mt-5 rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold hover:bg-violet-500">
-              {isArabic ? 'إعادة تحميل التطبيق' : 'Reload app'}
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="mt-5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white hover:from-violet-500 hover:to-blue-500 shadow-md"
+            >
+              {labels.reload}
             </button>
           </section>
         </main>
@@ -45,17 +49,14 @@ class AppErrorBoundary extends React.Component<
 }
 
 const Application: React.FC = () => {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   if (import.meta.env.PROD && !isSupabaseConfigured()) {
-    const isArabic = language === 'ar';
     return (
-      <main className="min-h-screen bg-vortex-dark-bg text-slate-100 flex items-center justify-center p-6">
-        <section role="alert" className="w-full max-w-xl rounded-2xl border border-rose-500/30 bg-slate-900 p-6 shadow-2xl">
-          <h1 className="text-xl font-bold">{isArabic ? 'إعدادات VORTEX غير مكتملة' : 'VORTEX is not configured'}</h1>
-          <p className="mt-3 text-sm leading-7 text-slate-300">
-            {isArabic
-              ? 'أضف VITE_SUPABASE_URL وVITE_SUPABASE_ANON_KEY إلى إعدادات البناء ثم أعد النشر. لم يتم تشغيل وضع البيانات التجريبية.'
-              : 'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your build environment, then redeploy. Demo data mode is disabled in production.'}
+      <main className="min-h-[100dvh] bg-bg text-fg flex items-center justify-center p-6">
+        <section role="alert" className="w-full max-w-xl rounded-2xl border border-rose-500/30 bg-surface-elevated p-6 shadow-2xl">
+          <h1 className="text-xl font-bold">{t('notConfiguredTitle')}</h1>
+          <p className="mt-3 text-sm leading-7 text-fg-muted">
+            {t('notConfiguredDescription')}
           </p>
         </section>
       </main>
@@ -65,8 +66,10 @@ const Application: React.FC = () => {
   return (
     <AuthProvider>
       <ToastProvider>
-        <AppErrorBoundary language={language}>
-          <RouterProvider router={router} />
+        <AppErrorBoundary labels={{ title: t('appErrorTitle'), description: t('appErrorDescription'), reload: t('reloadApp') }}>
+          <MotionConfig reducedMotion="user">
+            <RouterProvider router={router} />
+          </MotionConfig>
         </AppErrorBoundary>
       </ToastProvider>
     </AuthProvider>

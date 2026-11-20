@@ -39,15 +39,15 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
     event.target.value = '';
     if (!file) return;
     if (!IMAGE_TYPES.has(file.type)) {
-      showToast('Only JPG, PNG, WEBP and GIF images are supported.', 'error');
+      showToast(t('toastImageTypesOnly'), 'error');
       return;
     }
     if (file.size <= 0 || file.size > MAX_STORY_IMAGE_SIZE) {
-      showToast('Story images must be smaller than 10 MB.', 'error');
+      showToast(t('toastStoryTooLarge'), 'error');
       return;
     }
     if (!user) {
-      showToast('Please sign in before uploading a story.', 'error');
+      showToast(t('toastSignInToUploadStory'), 'error');
       return;
     }
 
@@ -57,7 +57,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
       setMediaPath(uploaded.url);
       setPreviewUrl(URL.createObjectURL(file));
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Image upload failed', 'error');
+      showToast(error instanceof Error ? error.message : t('toastImageUploadFailed'), 'error');
     } finally {
       setIsUploading(false);
     }
@@ -66,7 +66,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!mediaPath) {
-      showToast('Please select a photo first.', 'error');
+      showToast(t('toastSelectPhotoFirst'), 'error');
       return;
     }
 
@@ -77,14 +77,14 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
         mediaType: 'image',
         caption: caption.trim() || undefined,
       });
-      showToast('Story posted successfully!');
+      showToast(t('toastStoryPosted'));
       onStoryCreated(created);
       onClose();
       setMediaPath('');
       setPreviewUrl('');
       setCaption('');
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Failed to post story', 'error');
+      showToast(error instanceof Error ? error.message : t('toastStoryPostFailed'), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -94,29 +94,47 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
     <Modal isOpen={isOpen} onClose={onClose} title={t('createStory')} maxWidth="md">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <span className="text-xs font-semibold text-slate-300">{t('photo')}</span>
+          <span className="text-xs font-semibold text-fg-muted">{t('photo')}</span>
           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={(event) => void handleFileUpload(event)} />
-          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-950/70 px-4 py-5 text-xs font-semibold text-slate-200 hover:border-violet-500 disabled:opacity-50">
-            <UploadCloud className="h-4 w-4 text-violet-400" />
-            {isUploading ? t('uploadingMedia') : 'Choose an image'}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-surface-elevated/50 px-4 py-5 text-xs font-semibold text-fg hover:border-primary disabled:opacity-50"
+          >
+            <UploadCloud className="h-4 w-4 text-primary" />
+            {isUploading ? t('uploadingMedia') : t('chooseImage')}
           </button>
         </div>
 
         {previewUrl && (
-          <div className="relative flex max-h-64 items-center justify-center overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
-            <img src={previewUrl} alt="Story preview" className="max-h-60 w-auto rounded-xl object-contain" />
-            <button type="button" onClick={() => { setMediaPath(''); setPreviewUrl(''); }} className="absolute top-2 end-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-black" aria-label="Remove selected photo">
+          <div className="relative flex max-h-64 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface">
+            <img src={previewUrl} alt={t('storyPreviewAlt')} className="max-h-60 w-auto rounded-xl object-contain" />
+            <button
+              type="button"
+              onClick={() => { setMediaPath(''); setPreviewUrl(''); }}
+              className="absolute top-2 end-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-black"
+              aria-label={t('removeSelectedImage')}
+            >
               <X className="h-4 w-4" />
             </button>
           </div>
         )}
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">{t('storyCaption')}</label>
-          <textarea placeholder={t('uploadStoryPrompt')} value={caption} onChange={(event) => setCaption(event.target.value)} rows={2} maxLength={500} className="w-full resize-none rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-slate-100 outline-none focus:border-violet-500" />
+          <label className="text-xs font-semibold text-fg-muted">{t('storyCaption')}</label>
+          <textarea
+            placeholder={t('uploadStoryPrompt')}
+            value={caption}
+            onChange={(event) => setCaption(event.target.value)}
+            rows={2}
+            maxLength={500}
+            dir="auto"
+            className="w-full resize-none rounded-xl border border-border bg-surface p-3 text-xs text-fg outline-none focus:border-primary placeholder:text-fg-subtle"
+          />
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-slate-800/80 pt-2">
+        <div className="flex justify-end gap-2 border-t border-border pt-2">
           <Button type="button" variant="ghost" onClick={onClose}>{t('cancel')}</Button>
           <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={!mediaPath || isUploading} leftIcon={<Sparkles className="h-4 w-4" />}>{t('post')}</Button>
         </div>

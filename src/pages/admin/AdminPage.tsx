@@ -42,7 +42,7 @@ export const AdminPage: React.FC = () => {
       setAuditLogs(a);
       setLoadError(null);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to load administration data';
+      const message = error instanceof Error ? error.message : t('adminLoadFailed');
       setLoadError(message);
       showToast(message, 'error');
     } finally {
@@ -57,10 +57,10 @@ export const AdminPage: React.FC = () => {
   const handleResolveReport = async (reportId: string, action: 'dismiss' | 'actioned') => {
     try {
       await adminService.resolveReport(reportId, action);
-      showToast(action === 'dismiss' ? 'Report dismissed' : 'Report marked as actioned');
+      showToast(action === 'dismiss' ? t('toastReportDismissed') : t('toastReportActioned'));
       fetchAdminData();
     } catch {
-      showToast('Could not resolve report', 'error');
+      showToast(t('toastReportResolveFailed'), 'error');
     }
   };
 
@@ -70,7 +70,7 @@ export const AdminPage: React.FC = () => {
       showToast(isSuspended ? `@${username} has been suspended` : `@${username} suspension lifted`);
       fetchAdminData();
     } catch {
-      showToast('Action failed', 'error');
+      showToast(t('toastActionFailed'), 'error');
     }
   };
 
@@ -80,7 +80,7 @@ export const AdminPage: React.FC = () => {
       showToast(verified ? `@${username} verified badge awarded` : `@${username} verified badge removed`);
       fetchAdminData();
     } catch {
-      showToast('Action failed', 'error');
+      showToast(t('toastActionFailed'), 'error');
     }
   };
 
@@ -92,19 +92,19 @@ export const AdminPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[100dvh]">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 p-4 space-y-3">
+      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <ShieldCheck className="w-6 h-6 text-violet-400" />
+            <ShieldCheck className="w-6 h-6 text-primary" />
             <div>
-              <h1 className="text-lg font-black text-white">{t('adminDashboard')}</h1>
-              <span className="text-[11px] text-slate-400">Trust, Safety & Governance Console</span>
+              <h1 className="text-lg font-black text-fg">{t('adminDashboard')}</h1>
+              <span className="text-[11px] text-fg-muted">{t('adminConsoleSubtitle')}</span>
             </div>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700 font-semibold">
-            Health: {metrics?.serverHealth == null ? 'Not monitored' : `${metrics.serverHealth}%`}
+          <span className="text-xs px-2.5 py-1 rounded-full bg-surface-hover text-fg-muted border border-border font-semibold">
+            {t('adminHealth', { value: metrics?.serverHealth == null ? t('adminHealthNotMonitored') : `${metrics.serverHealth}%` })}
           </span>
         </div>
 
@@ -120,64 +120,64 @@ export const AdminPage: React.FC = () => {
       {/* Content */}
       <div className="p-4 sm:p-6 space-y-6">
         {loadError && (
-          <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-red-700 dark:text-danger">
             {loadError}
           </div>
         )}
         {isLoading && !metrics && (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-8 text-center text-sm text-slate-400">
-            Loading administration data...
+          <div className="rounded-xl border border-border bg-surface px-4 py-8 text-center text-sm text-fg-muted">
+            {t('loadingAdminData')}
           </div>
         )}
         {/* Overview Tab */}
         {activeTab === 'overview' && metrics && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <span className="text-xs text-slate-400 font-medium block">{t('totalUsers')}</span>
-                <span className="text-xl sm:text-2xl font-black text-white mt-1 block">
+              <div className="p-4 rounded-2xl bg-surface border border-border">
+                <span className="text-xs text-fg-muted font-medium block">{t('totalUsers')}</span>
+                <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
                   {metrics.totalUsers.toLocaleString()}
                 </span>
-                <span className="text-[11px] text-slate-500 mt-1 block">Registered accounts</span>
+                <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminRegisteredAccounts')}</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <span className="text-xs text-slate-400 font-medium block">{t('activeToday')}</span>
-                <span className="text-xl sm:text-2xl font-black text-white mt-1 block">
+              <div className="p-4 rounded-2xl bg-surface border border-border">
+                <span className="text-xs text-fg-muted font-medium block">{t('activeToday')}</span>
+                <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
                   {metrics.activeToday == null ? '—' : metrics.activeToday.toLocaleString()}
                 </span>
-                <span className="text-[11px] text-slate-500 mt-1 block">Activity tracking unavailable</span>
+                <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminActivityUnavailable')}</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <span className="text-xs text-slate-400 font-medium block">{t('totalPostsCount')}</span>
-                <span className="text-xl sm:text-2xl font-black text-white mt-1 block">
+              <div className="p-4 rounded-2xl bg-surface border border-border">
+                <span className="text-xs text-fg-muted font-medium block">{t('totalPostsCount')}</span>
+                <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
                   {metrics.totalPosts.toLocaleString()}
                 </span>
-                <span className="text-[11px] text-slate-500 mt-1 block">Published posts</span>
+                <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminPublishedPosts')}</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-                <span className="text-xs text-slate-400 font-medium block">{t('pendingReportsCount')}</span>
-                <span className="text-xl sm:text-2xl font-black text-rose-400 mt-1 block">
+              <div className="p-4 rounded-2xl bg-surface border border-border">
+                <span className="text-xs text-fg-muted font-medium block">{t('pendingReportsCount')}</span>
+                <span className="text-xl sm:text-2xl font-black text-danger-text mt-1 block">
                   {reports.filter((r) => r.status === 'pending').length}
                 </span>
-                <span className="text-[11px] text-slate-500 mt-1 block">Needs attention</span>
+                <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminNeedsAttention')}</span>
               </div>
             </div>
 
             {/* Quick Action Queue preview */}
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 space-y-3">
+            <div className="p-5 rounded-2xl bg-surface border border-border space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-amber-400" />
-                  <span>Pending Moderation Items</span>
+                <h3 className="text-sm font-bold text-fg flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-warning" />
+                  <span>{t('adminPendingItems')}</span>
                 </h3>
                 <button
                   onClick={() => setActiveTab('reports')}
-                  className="text-xs text-violet-400 hover:underline"
+                  className="text-xs text-primary-text hover:underline"
                 >
-                  View all reports
+                  {t('viewAllReports')}
                 </button>
               </div>
 
@@ -188,26 +188,26 @@ export const AdminPage: React.FC = () => {
                   .map((rep) => (
                     <div
                       key={rep.id}
-                      className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between gap-3 text-xs"
+                      className="p-3.5 rounded-xl bg-bg border border-border flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="min-w-0">
-                        <span className="font-bold text-rose-400 block">{rep.reason}</span>
-                        <p className="text-slate-300 truncate mt-0.5 max-w-md">
+                        <span className="font-bold text-danger-text block">{rep.reason}</span>
+                        <p className="text-fg-muted truncate mt-0.5 max-w-md">
                           "{rep.reportedItemSnippet}"
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => handleResolveReport(rep.id, 'dismiss')}
-                          className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                          className="px-2.5 py-1 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover"
                         >
-                          Dismiss
+                          {t('dismissReport')}
                         </button>
                         <button
                           onClick={() => handleResolveReport(rep.id, 'actioned')}
-                          className="px-2.5 py-1 rounded-lg bg-rose-600/20 text-rose-300 border border-rose-500/30 hover:bg-rose-600/30 font-semibold"
+                          className="px-2.5 py-1 rounded-lg bg-danger/10 text-danger-text border border-danger/30 hover:bg-danger/20 font-semibold"
                         >
-                          Mark Actioned
+                          {t('markActioned')}
                         </button>
                       </div>
                     </div>
@@ -220,48 +220,48 @@ export const AdminPage: React.FC = () => {
         {/* Users Management Tab */}
         {activeTab === 'users' && (
           <div className="space-y-4">
-            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/60">
-              <table className="w-full text-start text-xs text-slate-300">
-                <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider text-[10px]">
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+              <table className="w-full text-start text-xs text-fg-muted">
+                <thead className="bg-bg text-fg-muted border-b border-border uppercase tracking-wider text-[10px]">
                   <tr>
-                    <th className="p-3.5 text-start">User</th>
-                    <th className="p-3.5 text-start">Role</th>
-                    <th className="p-3.5 text-start">Followers</th>
-                    <th className="p-3.5 text-start">Status</th>
-                    <th className="p-3.5 text-end">Actions</th>
+                    <th className="p-3.5 text-start">{t('colUser')}</th>
+                    <th className="p-3.5 text-start">{t('colRole')}</th>
+                    <th className="p-3.5 text-start">{t('followers')}</th>
+                    <th className="p-3.5 text-start">{t('status')}</th>
+                    <th className="p-3.5 text-end">{t('actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-border">
                   {users.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-850/40">
+                    <tr key={u.id} className="hover:bg-surface-hover/60">
                       <td className="p-3.5">
                         <div className="flex items-center gap-2.5">
                           <Avatar src={u.avatar} alt={u.name} size="sm" />
                           <div className="flex flex-col min-w-0">
-                            <span className="font-bold text-white truncate">{u.name}</span>
-                            <span className="text-[11px] text-slate-500">@{u.username}</span>
+                            <span className="font-bold text-fg truncate">{u.name}</span>
+                            <span className="text-[11px] text-fg-subtle">@{u.username}</span>
                           </div>
                         </div>
                       </td>
                       <td className="p-3.5">
-                        <span className="capitalize font-semibold text-violet-300">{u.role}</span>
+                        <span className="capitalize font-semibold text-primary-text">{u.role}</span>
                       </td>
                       <td className="p-3.5">{u.followersCount.toLocaleString()}</td>
                       <td className="p-3.5">
                         {u.isBlocked ? (
-                          <span className="text-rose-400 font-semibold">Suspended</span>
+                          <span className="text-danger-text font-semibold">{t('suspendedStatus')}</span>
                         ) : (
-                          <span className="text-emerald-400 font-semibold">Active</span>
+                          <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{t('activeStatus')}</span>
                         )}
                       </td>
-                      <td className="p-3.5 text-end space-x-2">
+                      <td className="p-3.5 text-end [&>*+*]:ms-2">
                         <Button
                           onClick={() => handleToggleVerification(u.id, u.username)}
                           variant="outline"
                           size="sm"
                           className="text-[11px] py-1 px-2.5"
                         >
-                          {u.verified ? 'Revoke Verified' : 'Grant Verified'}
+                          {u.verified ? t('revokeVerified') : t('grantVerified')}
                         </Button>
                         <Button
                           onClick={() => handleToggleSuspension(u.id, u.username)}
@@ -284,26 +284,26 @@ export const AdminPage: React.FC = () => {
         {activeTab === 'reports' && (
           <div className="space-y-4">
             {reports.length === 0 ? (
-              <p className="text-xs text-slate-500">No reports found.</p>
+              <p className="text-xs text-fg-subtle">{t('noReportsFound')}</p>
             ) : (
               <div className="space-y-3">
                 {reports.map((rep) => (
                   <div
                     key={rep.id}
-                    className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="p-4 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-rose-400">{rep.reason}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 capitalize">
+                        <span className="text-xs font-bold text-danger-text">{rep.reason}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-hover text-fg-muted capitalize">
                           {rep.status}
                         </span>
-                        <span className="text-[10px] text-slate-500">{rep.createdAt}</span>
+                        <span className="text-[10px] text-fg-subtle">{rep.createdAt}</span>
                       </div>
-                      <p className="text-xs text-slate-200 italic bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                      <p className="text-xs text-fg italic bg-bg p-2.5 rounded-xl border border-border">
                         "{rep.reportedItemSnippet}"
                       </p>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-[11px] text-fg-muted block">
                         Reported by: @{rep.reportedByUser.username} · Details: {rep.details || 'None provided'}
                       </span>
                     </div>
@@ -337,18 +337,18 @@ export const AdminPage: React.FC = () => {
 
         {/* Audit Log Tab */}
         {activeTab === 'audit' && (
-          <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-            <h3 className="text-sm font-bold text-white">System Audit & Governance Trail</h3>
-            <div className="divide-y divide-slate-800/60">
+          <div className="p-4 rounded-2xl bg-surface border border-border space-y-3">
+            <h3 className="text-sm font-bold text-fg">{t('adminAuditTitle')}</h3>
+            <div className="divide-y divide-border">
               {auditLogs.map((log) => (
                 <div key={log.id} className="py-3 flex items-center justify-between text-xs">
                   <div>
-                    <span className="font-bold text-white">{log.adminName}</span>
-                    <span className="text-slate-400 mx-1.5">—</span>
-                    <span className="text-slate-300">{log.action}</span>
-                    <span className="text-violet-400 ms-1.5">({log.target})</span>
+                    <span className="font-bold text-fg">{log.adminName}</span>
+                    <span className="text-fg-muted mx-1.5">—</span>
+                    <span className="text-fg-muted">{log.action}</span>
+                    <span className="text-primary-text ms-1.5">({log.target})</span>
                   </div>
-                  <span className="text-[10px] text-slate-500">{log.timestamp}</span>
+                  <span className="text-[10px] text-fg-subtle">{log.timestamp}</span>
                 </div>
               ))}
             </div>

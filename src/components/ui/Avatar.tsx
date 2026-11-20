@@ -35,7 +35,6 @@ export const Avatar: React.FC<AvatarProps> = ({
     '2xl': 'w-5 h-5 border-[2.5px]',
   };
 
-  // Generate deterministic gradient based on name
   const getInitials = (name: string) => {
     if (!name) return 'V';
     const parts = name.trim().split(' ');
@@ -48,7 +47,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div className={`relative inline-block shrink-0 select-none ${className}`}>
       <div
-        className={`rounded-full overflow-hidden flex items-center justify-center font-bold text-white shadow-inner ring-1 ring-white/10 ${sizeClasses[size]} bg-gradient-to-tr from-violet-700 via-indigo-600 to-blue-500`}
+        className={`rounded-full overflow-hidden flex items-center justify-center font-bold text-white shadow-inner ring-1 ring-border/20 ${sizeClasses[size]} bg-gradient-to-tr from-violet-700 via-indigo-600 to-blue-500`}
       >
         {src && !hasError ? (
           <img
@@ -65,9 +64,9 @@ export const Avatar: React.FC<AvatarProps> = ({
 
       {isOnline !== undefined && (
         <span
-          className={`absolute bottom-0 end-0 rounded-full border-slate-900 ${
+          className={`absolute bottom-0 end-0 rounded-full border-surface ${
             statusDotSizes[size]
-          } ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]' : 'bg-slate-500'}`}
+          } ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]' : 'bg-fg-subtle'}`}
           title={isOnline ? 'Online' : 'Offline'}
         />
       )}

@@ -44,7 +44,7 @@ export const StoriesBar: React.FC = () => {
 
   return (
     <>
-      <div className="relative py-2.5 px-4 overflow-x-auto no-scrollbar border-b border-slate-800/60 bg-slate-950/40 select-none">
+      <div className="relative py-2.5 px-4 overflow-x-auto no-scrollbar border-b border-border bg-surface/50 select-none">
         <div className="flex items-center gap-3.5 sm:gap-4 min-w-max">
           {/* Create / Your Story Item */}
           <div className="flex flex-col items-center gap-1.5 cursor-pointer group">
@@ -69,7 +69,7 @@ export const StoriesBar: React.FC = () => {
                     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
                   }
                   alt={user?.name || 'Your Story'}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-slate-950"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-surface"
                 />
               </button>
 
@@ -79,13 +79,14 @@ export const StoriesBar: React.FC = () => {
                   e.stopPropagation();
                   setIsCreateModalOpen(true);
                 }}
-                className="absolute bottom-0 end-0 p-1 rounded-full bg-violet-600 hover:bg-violet-500 text-white border-2 border-slate-950 shadow-md transition-transform hover:scale-110"
+                className="absolute bottom-0 end-0 p-1 rounded-full bg-primary hover:bg-primary-hover text-primary-fg border-2 border-surface shadow-md transition-transform hover:scale-110 min-w-[24px] min-h-[24px] flex items-center justify-center"
                 title={t('addStory')}
+                aria-label={t('addStory')}
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
               </button>
             </div>
-            <span className="text-[11px] font-medium text-slate-300 max-w-[68px] truncate">
+            <span className="text-[11px] font-medium text-fg-muted max-w-[68px] truncate">
               {t('yourStory')}
             </span>
           </div>
@@ -95,8 +96,8 @@ export const StoriesBar: React.FC = () => {
             // Skeleton circles
             [1, 2, 3, 4].map((i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-800/80 animate-pulse border-2 border-slate-700/50" />
-                <div className="w-10 h-2 bg-slate-800 rounded animate-pulse" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-surface-hover animate-pulse border-2 border-border" />
+                <div className="w-10 h-2 bg-surface-hover rounded animate-pulse" />
               </div>
             ))
           ) : (
@@ -114,17 +115,17 @@ export const StoriesBar: React.FC = () => {
                       className={`p-[2.5px] rounded-full transition-transform group-hover:scale-105 ${
                         group.hasUnviewed
                           ? 'bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-blue-500 shadow-[0_0_12px_rgba(139,92,246,0.3)]'
-                          : 'border-2 border-slate-700/70 p-[1.5px]'
+                          : 'border-2 border-border p-[1.5px]'
                       }`}
                     >
                       <img
                         src={group.user.avatar}
                         alt={group.user.name}
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-slate-950"
+                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-surface"
                       />
                     </div>
-                    <span className="text-[11px] font-medium text-slate-300 max-w-[68px] truncate">
-                      {group.user.name.split(' ')[0]}
+                    <span className="text-[11px] font-medium text-fg-muted max-w-[68px] truncate">
+                      <bdi>{group.user.name.split(' ')[0]}</bdi>
                     </span>
                   </button>
                 );

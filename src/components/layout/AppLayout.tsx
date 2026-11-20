@@ -14,7 +14,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true })
   const [createPostOpen, setCreatePostOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-vortex-dark-bg text-slate-100 flex flex-col antialiased">
+    <div className="min-h-[100dvh] bg-bg text-fg flex flex-col antialiased">
       {/* Mobile Top Navigation */}
       <MobileTopNav />
 
@@ -24,7 +24,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true })
         <LeftSidebar onOpenCreatePost={() => setCreatePostOpen(true)} />
 
         {/* Central Focus Content */}
-        <main className="flex-1 min-w-0 max-w-2xl lg:max-w-3xl border-x border-slate-800/80 min-h-screen pb-20 md:pb-8">
+        <main className="flex-1 min-w-0 max-w-2xl lg:max-w-3xl border-x border-border min-h-[100dvh] pb-20 md:pb-8">
           <Outlet />
         </main>
 
@@ -40,7 +40,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true })
         isOpen={createPostOpen}
         onClose={() => setCreatePostOpen(false)}
         onPostCreated={() => {
-          // Window reload or custom trigger
           window.dispatchEvent(new CustomEvent('vortex:post_created'));
         }}
       />

@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import { AppLayout } from '../components/layout/AppLayout';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { authService } from '../services';
 import { LandingPage } from '../pages/LandingPage';
 import { HomePage } from '../pages/feed/HomePage';
@@ -16,20 +17,29 @@ import { BookmarksPage } from '../pages/bookmarks/BookmarksPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { AdminPage } from '../pages/admin/AdminPage';
 import { HashtagPage } from '../pages/hashtag/HashtagPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
 
 import { SignInPage } from '../pages/auth/SignInPage';
 import { SignUpPage } from '../pages/auth/SignUpPage';
 import { ForgotPasswordPage, ResetPasswordPage } from '../pages/auth/ForgotPasswordPage';
 import { VerifyEmailPage } from '../pages/auth/VerifyEmailPage';
 
-const RouteLoading: React.FC = () => (
-  <div className="min-h-screen flex items-center justify-center bg-vortex-dark-bg text-slate-300">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" aria-label="Loading" />
-  </div>
-);
+const RouteLoading: React.FC = () => {
+  const { t } = useLanguage();
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-bg text-fg-muted">
+      <div
+        role="status"
+        aria-label={t('loading')}
+        className="h-8 w-8 animate-spin motion-reduce:animate-none rounded-full border-2 border-primary border-t-transparent"
+      />
+    </div>
+  );
+};
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
+
   if (isLoading) return <RouteLoading />;
   if (!user) return <Navigate to="/auth/signin" replace />;
   if (!isAuthenticated) return <Navigate to="/auth/verify" replace />;
@@ -38,6 +48,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const GuestRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
+
   if (isLoading) return <RouteLoading />;
   if (user && user.emailVerified === false) return <Navigate to="/auth/verify" replace />;
   if (isAuthenticated) return <Navigate to="/feed" replace />;
@@ -51,12 +62,14 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     let active = true;
+
     const verifyAdminRole = async () => {
       if (isLoading || !isAuthenticated || !user) {
         setIsChecking(false);
         setIsAuthorized(false);
         return;
       }
+
       setIsChecking(true);
       try {
         const allowed = await authService.hasAdminRole();
@@ -67,8 +80,11 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         if (active) setIsChecking(false);
       }
     };
+
     void verifyAdminRole();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [isAuthenticated, isLoading, user?.id]);
 
   if (isLoading) return <RouteLoading />;
@@ -81,6 +97,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const VerificationRoute: React.FC = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
+
   if (isLoading) return <RouteLoading />;
   if (isAuthenticated) return <Navigate to="/feed" replace />;
   if (user?.emailVerified) return <Navigate to="/feed" replace />;
@@ -88,14 +105,51 @@ const VerificationRoute: React.FC = () => {
 };
 
 export const router = createBrowserRouter([
-  { path: '/', element: <LandingPage /> },
-  { path: '/auth/signin', element: <GuestRoute><SignInPage /></GuestRoute> },
-  { path: '/auth/signup', element: <GuestRoute><SignUpPage /></GuestRoute> },
-  { path: '/auth/forgot', element: <GuestRoute><ForgotPasswordPage /></GuestRoute> },
-  { path: '/auth/verify', element: <VerificationRoute /> },
-  { path: '/auth/reset', element: <ResetPasswordPage /> },
   {
-    element: <ProtectedRoute><AppLayout showRightSidebar={true} /></ProtectedRoute>,
+    path: '/',
+    element: <LandingPage />,
+  },
+
+  {
+    path: '/auth/signin',
+    element: (
+      <GuestRoute>
+        <SignInPage />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/auth/signup',
+    element: (
+      <GuestRoute>
+        <SignUpPage />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/auth/forgot',
+    element: (
+      <GuestRoute>
+        <ForgotPasswordPage />
+      </GuestRoute>
+    ),
+  },
+  {
+    path: '/auth/verify',
+    element: <VerificationRoute />,
+  },
+  // A valid password-recovery callback must remain accessible to its authenticated user.
+  {
+    path: '/auth/reset',
+    element: <ResetPasswordPage />,
+  },
+
+  {
+    element: (
+      <ProtectedRoute>
+        <AppLayout showRightSidebar={true} />
+      </ProtectedRoute>
+    ),
     children: [
       { path: '/feed', element: <HomePage /> },
       { path: '/explore', element: <ExplorePage /> },
@@ -106,15 +160,31 @@ export const router = createBrowserRouter([
       { path: '/communities/:slug', element: <CommunityDetailPage /> },
       { path: '/bookmarks', element: <BookmarksPage /> },
       { path: '/settings', element: <SettingsPage /> },
-      { path: '/admin', element: <AdminRoute><AdminPage /></AdminRoute> },
+      {
+        path: '/admin',
+        element: (
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        ),
+      },
       { path: '/hashtag/:tag', element: <HashtagPage /> },
     ],
   },
+
   {
-    element: <ProtectedRoute><AppLayout showRightSidebar={false} /></ProtectedRoute>,
-    children: [{ path: '/messages', element: <MessagesPage /> }],
+    element: (
+      <ProtectedRoute>
+        <AppLayout showRightSidebar={false} />
+      </ProtectedRoute>
+    ),
+    children: [
+      { path: '/messages', element: <MessagesPage /> },
+    ],
   },
-  { path: '*', element: <Navigate to="/" replace /> },
-], {
-  basename: '/VORTEX',
-});
+
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
+]);

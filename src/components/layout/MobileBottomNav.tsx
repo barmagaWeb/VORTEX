@@ -18,13 +18,13 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   const { t } = useLanguage();
 
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800/80 px-2 py-2 flex items-center justify-around select-none">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-surface/90 backdrop-blur-lg border-t border-border px-2 py-1.5 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))] flex items-center justify-around select-none">
       {/* Home */}
       <NavLink
         to="/feed"
         className={({ isActive }) =>
-          `flex flex-col items-center justify-center p-2 rounded-xl transition-colors ${
-            isActive ? 'text-violet-400' : 'text-slate-400 hover:text-slate-200'
+          `flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-h-[44px] min-w-[44px] ${
+            isActive ? 'text-primary-text' : 'text-fg-muted hover:text-fg'
           }`
         }
         aria-label={t('home')}
@@ -36,7 +36,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       {/* Center Floating Create Post Button */}
       <button
         onClick={onOpenCreatePost}
-        className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-blue-500 text-white shadow-lg shadow-violet-600/40 -mt-5 active:scale-90 transition-transform border-2 border-slate-950 focus:outline-none"
+        className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-blue-500 text-white shadow-lg shadow-violet-600/40 -mt-5 active:scale-90 transition-transform border-2 border-surface focus:outline-none"
         aria-label={t('createPost')}
       >
         <Plus className="w-6 h-6 stroke-[2.5]" />
@@ -46,8 +46,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       <NavLink
         to="/notifications"
         className={({ isActive }) =>
-          `relative flex flex-col items-center justify-center p-2 rounded-xl transition-colors ${
-            isActive ? 'text-violet-400' : 'text-slate-400 hover:text-slate-200'
+          `relative flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-h-[44px] min-w-[44px] ${
+            isActive ? 'text-primary-text' : 'text-fg-muted hover:text-fg'
           }`
         }
         aria-label={t('notifications')}
@@ -55,7 +55,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         <div className="relative">
           <Bell className="w-5 h-5" />
           {unreadNotifsCount > 0 && (
-            <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-slate-900" />
+            <span className="absolute -top-1 -end-1 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-surface" />
           )}
         </div>
         <span className="text-[10px] mt-0.5 font-medium">{t('notifications')}</span>
@@ -65,8 +65,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       <NavLink
         to={user ? `/profile/${user.username}` : '/profile'}
         className={({ isActive }) =>
-          `flex flex-col items-center justify-center p-2 rounded-xl transition-colors ${
-            isActive ? 'text-violet-400' : 'text-slate-400 hover:text-slate-200'
+          `flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-h-[44px] min-w-[44px] ${
+            isActive ? 'text-primary-text' : 'text-fg-muted hover:text-fg'
           }`
         }
         aria-label={t('profile')}

@@ -8,10 +8,17 @@ interface LanguageContextType {
   isRTL: boolean;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
-  t: (key: keyof typeof translations.en) => string;
+  t: (key: keyof typeof translations.en, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+const applyLanguageToDOM = (lang: Language) => {
+  const root = document.documentElement;
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  root.setAttribute('lang', lang);
+  root.setAttribute('dir', dir);
+};
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
@@ -27,23 +34,44 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isRTL = direction === 'rtl';
 
   useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute('lang', language);
-    root.setAttribute('dir', direction);
-    try { localStorage.setItem('vortex_lang', language); } catch { /* Storage may be disabled. */ }
-  }, [language, direction]);
+    applyLanguageToDOM(language);
+    try {
+      localStorage.setItem('vortex_lang', language);
+    } catch {
+      /* Storage may be disabled. */
+    }
+  }, [language]);
 
   const setLanguage = useCallback((lang: Language) => {
+    applyLanguageToDOM(lang);
     setLanguageState(lang);
+    try {
+      localStorage.setItem('vortex_lang', lang);
+    } catch {
+      /* Storage may be disabled. */
+    }
   }, []);
 
   const toggleLanguage = useCallback(() => {
-    setLanguageState((prev) => (prev === 'en' ? 'ar' : 'en'));
+    setLanguageState((prev) => {
+      const next = prev === 'en' ? 'ar' : 'en';
+      applyLanguageToDOM(next);
+      try {
+        localStorage.setItem('vortex_lang', next);
+      } catch {
+        /* Storage may be disabled. */
+      }
+      return next;
+    });
   }, []);
 
-  const t = (key: keyof typeof translations.en): string => {
+  const t = (key: keyof typeof translations.en, params?: Record<string, string | number>): string => {
     const langDict = translations[language] || translations.en;
-    return (langDict[key] as string) || (translations.en[key] as string) || String(key);
+    const template = (langDict[key] as string) || (translations.en[key] as string) || String(key);
+    if (!params) return template;
+    return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+      name in params ? String(params[name]) : match,
+    );
   };
 
   return (

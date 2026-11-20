@@ -23,7 +23,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    'relative inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-xl active:scale-[0.98]';
+    'relative inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:opacity-50 disabled:cursor-not-allowed select-none rounded-xl active:scale-[0.98] min-h-[40px] sm:min-h-0';
 
   const sizeStyles = {
     sm: 'text-xs px-3 py-1.5 gap-1.5',
@@ -33,15 +33,15 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     primary:
-      'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white shadow-lg shadow-violet-600/25 border border-violet-400/20 hover:shadow-violet-600/40',
+      'bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white shadow-md shadow-violet-600/25 border border-violet-400/20 hover:shadow-violet-600/40',
     secondary:
-      'bg-slate-800/90 hover:bg-slate-700/90 text-slate-100 border border-slate-700/60 hover:border-slate-600 shadow-sm',
+      'bg-surface-elevated hover:bg-surface-hover text-fg border border-border hover:border-fg-muted/40 shadow-sm',
     outline:
-      'bg-transparent hover:bg-slate-800/40 text-slate-200 border border-slate-700/70 hover:border-violet-500/50 hover:text-white',
+      'bg-transparent hover:bg-surface-hover text-fg border border-border hover:border-primary/50',
     ghost:
-      'bg-transparent hover:bg-slate-800/60 text-slate-300 hover:text-white',
+      'bg-transparent hover:bg-surface-hover text-fg-muted hover:text-fg',
     danger:
-      'bg-rose-600/90 hover:bg-rose-500 text-white shadow-md shadow-rose-900/30 border border-rose-500/30',
+      'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/25 border border-rose-500/30',
   };
 
   return (

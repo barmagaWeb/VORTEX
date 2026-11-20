@@ -4,7 +4,80 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --font-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    /* Light Theme Semantic Tokens */
+    --v-bg: 248 250 252;               /* #F8FAFC soft off-white canvas */
+    --v-surface: 255 255 255;           /* #FFFFFF pure white card/container */
+    --v-surface-elevated: 255 255 255;  /* #FFFFFF elevated modal/sheet */
+    --v-surface-hover: 241 245 249;     /* #F1F5F9 slate-100 hover state */
+    --v-surface-card: 255 255 255;      /* #FFFFFF card base */
+    --v-surface-active: 226 232 240;    /* #E2E8F0 slate-200 active state */
+
+    --v-border: 226 232 240;            /* #E2E8F0 slate-200 clear border */
+    --v-border-subtle: 241 245 249;     /* #F1F5F9 slate-100 hairline divider */
+
+    --v-fg: 15 23 42;                   /* #0F172A slate-900 high-contrast body */
+    --v-fg-muted: 71 85 105;            /* #475569 slate-600 readable secondary */
+    --v-fg-subtle: 90 104 127;          /* #5A687F captions/placeholders, >=4.5:1 on surface/bg/hover */
+
+    --v-primary: 124 58 237;            /* #7C3AED violet-600 (fills, icons, rings) */
+    --v-primary-hover: 109 40 217;      /* #6D28D9 violet-700 */
+    --v-primary-fg: 255 255 255;
+    --v-primary-text: 109 40 217;       /* #6D28D9 violet-700 - primary-coloured SMALL TEXT */
+
+    --v-accent: 37 99 235;              /* #2563EB blue-600 */
+    --v-accent-fg: 255 255 255;
+
+    --v-success: 16 185 129;            /* #10B981 emerald-500 */
+    --v-warning: 217 119 6;             /* #D97706 amber-600 */
+    --v-danger: 220 38 38;              /* #DC2626 red-600 (fills, icons, borders) */
+    --v-danger-text: 185 28 28;         /* #B91C1C red-700 - danger SMALL TEXT, incl. on bg-danger/10-15 */
+    --v-success-text: 6 95 70;          /* #065F46 emerald-800 - success SMALL TEXT */
+
+    --v-ring: 124 58 237;               /* violet-600 ring */
+    --v-overlay: 15 23 42;              /* dark overlay backdrop */
+
+    --v-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 4px 16px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  }
+
+  .dark {
+    color-scheme: dark;
+
+    /* Dark Theme Semantic Tokens */
+    --v-bg: 10 13 20;                   /* #0A0D14 dark canvas */
+    --v-surface: 15 19 29;              /* #0F131D dark surface */
+    --v-surface-elevated: 21 25 38;     /* #151926 elevated modal/sheet */
+    --v-surface-hover: 34 41 61;        /* #22293D hover surface */
+    --v-surface-card: 24 30 46;         /* #181E2E card base */
+    --v-surface-active: 40 48 70;
+
+    --v-border: 35 42 62;               /* #232A3E dark border */
+    --v-border-subtle: 25 32 50;        /* #192032 subtle border */
+
+    --v-fg: 248 250 252;                /* #F8FAFC slate-50/100 high-contrast body */
+    --v-fg-muted: 148 163 184;          /* #94A3B8 slate-400 readable secondary */
+    --v-fg-subtle: 130 146 170;         /* #8292AA captions/placeholders, >=4.5:1 on bg/surface/elevated/card/hover */
+
+    --v-primary: 124 58 237;            /* #7C3AED violet-600 (fills, icons, rings) */
+    --v-primary-hover: 139 92 246;      /* #8B5CF6 violet-500 */
+    --v-primary-fg: 255 255 255;
+    --v-primary-text: 196 181 253;      /* #C4B5FD violet-300 - primary-coloured SMALL TEXT */
+
+    --v-accent: 59 130 246;             /* #3B82F6 blue-500 */
+    --v-accent-fg: 255 255 255;
+
+    --v-success: 16 185 129;            /* #10B981 emerald-500 */
+    --v-warning: 245 158 11;            /* #F59E0B amber-500 */
+    --v-danger: 239 68 68;              /* #EF4444 red-500 (fills, icons, borders) */
+    --v-danger-text: 252 165 165;       /* #FCA5A5 red-300 - danger SMALL TEXT, incl. on bg-danger/10-15 */
+    --v-success-text: 110 231 183;      /* #6EE7B7 emerald-300 - success SMALL TEXT */
+
+    --v-ring: 139 92 246;               /* violet-500 ring */
+    --v-overlay: 0 0 0;                 /* black overlay backdrop */
+
+    --v-shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
   }
 
   /* Smooth scroll */
@@ -13,7 +86,13 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Custom scrollbar for premium dark aesthetic */
+  body {
+    background-color: rgb(var(--v-bg));
+    color: rgb(var(--v-fg));
+    font-family: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Custom scrollbars */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -23,38 +102,74 @@
     background: transparent;
   }
 
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.25);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.45);
+  }
+
   .dark ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.12);
     border-radius: 9999px;
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.24);
   }
 
-  ::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 9999px;
+  /* Text selection */
+  ::selection {
+    background-color: rgba(124, 58, 237, 0.35);
+    color: inherit;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 0, 0, 0.25);
+  .dark ::selection {
+    background-color: rgba(139, 92, 246, 0.45);
+    color: #FFFFFF;
   }
 
-  /* RTL font priority */
+  /* Accessible focus rings */
+  :focus-visible {
+    outline: 2px solid rgb(var(--v-ring));
+    outline-offset: 2px;
+  }
+
+  /* RTL font priority & line height for Arabic diacritics */
   [dir="rtl"] {
-    font-family: "IBM Plex Sans Arabic", "Cairo", sans-serif;
+    font-family: "IBM Plex Sans Arabic", "Cairo", system-ui, sans-serif;
+    line-height: 1.65;
   }
 
   [dir="ltr"] {
-    font-family: "Plus Jakarta Sans", Inter, sans-serif;
+    font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
   }
 }
 
-/* Glassmorphism and gradient helpers */
+/* Smooth theme transition, disabled when prefers-reduced-motion: reduce */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease !important;
+    transition-delay: 0s !important;
+  }
+}
+
+/* Glassmorphism helpers for both themes */
 .glass-panel {
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 19, 29, 0.8);
+  border: 1px solid rgba(35, 42, 62, 0.8);
 }
 
 .gradient-border {

@@ -90,9 +90,9 @@ export const ExplorePage: React.FC = () => {
       setUsers((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, isFollowing: res.isFollowing, isFollowPending: Boolean(res.isPending) } : u))
       );
-      showToast(res.isPending ? t('followRequestSent') : res.isFollowing ? `Followed ${name}` : `Unfollowed ${name}`);
+      showToast(res.isPending ? t('followRequestSent') : res.isFollowing ? t('toastFollowed', { name }) : t('toastUnfollowed', { name }));
     } catch {
-      showToast('Could not follow user', 'error');
+      showToast(t('toastFollowUserFailed'), 'error');
     }
   };
 
@@ -104,17 +104,17 @@ export const ExplorePage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[100dvh]">
       {/* Sticky Top Header */}
-      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 p-4 space-y-3">
+      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border p-4 space-y-3">
         <form onSubmit={handleFormSubmit} className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute start-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-fg-subtle absolute start-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full bg-slate-900/90 text-slate-100 placeholder-slate-500 text-sm rounded-full border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 ps-10 pe-4 py-2.5 outline-none"
+            className="w-full bg-surface text-fg placeholder:text-fg-subtle text-sm rounded-full border border-border focus:border-primary focus:ring-1 focus:ring-primary/40 ps-10 pe-4 py-2.5 outline-none transition-all"
           />
         </form>
 
@@ -124,10 +124,10 @@ export const ExplorePage: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors min-h-[32px] ${
                 selectedCategory === cat
-                  ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  ? 'bg-primary text-primary-fg shadow-sm'
+                  : 'bg-surface text-fg-muted hover:text-fg border border-border'
               }`}
             >
               {cat}
@@ -150,24 +150,24 @@ export const ExplorePage: React.FC = () => {
         {(activeTab === 'people' || (activeTab === 'all' && users.length > 0)) && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-400" />
-              <h3 className="font-bold text-sm text-slate-100">{t('peopleTab')}</h3>
+              <Users className="w-4 h-4 text-blue-500" />
+              <h3 className="font-bold text-sm text-fg">{t('peopleTab')}</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {users.map((u) => (
                 <div
                   key={u.id}
-                  className="p-3.5 rounded-2xl bg-slate-900/50 border border-slate-800 flex items-center justify-between gap-3"
+                  className="p-3.5 rounded-2xl bg-surface border border-border flex items-center justify-between gap-3 shadow-card"
                 >
                   <Link to={`/profile/${u.username}`} className="flex items-center gap-2.5 min-w-0">
                     <Avatar src={u.avatar} alt={u.name} size="md" />
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-1">
-                        <span className="text-xs font-bold text-white truncate">{u.name}</span>
+                        <span className="text-xs font-bold text-fg truncate"><bdi>{u.name}</bdi></span>
                         {u.verified && <Badge variant="verified" size="sm" />}
                       </div>
-                      <span className="text-[11px] text-slate-500 truncate">@{u.username}</span>
-                      <span className="text-[10px] text-slate-400 mt-0.5 truncate">{u.bio}</span>
+                      <span className="text-[11px] text-fg-subtle truncate" dir="ltr">@{u.username}</span>
+                      <span className="text-[10px] text-fg-muted mt-0.5 truncate" dir="auto">{u.bio}</span>
                     </div>
                   </Link>
 
@@ -189,33 +189,33 @@ export const ExplorePage: React.FC = () => {
         {(activeTab === 'communities' || (activeTab === 'all' && communities.length > 0)) && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-violet-400" />
-              <h3 className="font-bold text-sm text-slate-100">{t('communitiesTab')}</h3>
+              <Compass className="w-4 h-4 text-primary" />
+              <h3 className="font-bold text-sm text-fg">{t('communitiesTab')}</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {communities.map((comm) => (
                 <div
                   key={comm.id}
-                  className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800 flex flex-col justify-between gap-3"
+                  className="p-4 rounded-2xl bg-surface border border-border flex flex-col justify-between gap-3 shadow-card"
                 >
                   <div className="flex items-center gap-3">
                     <Avatar src={comm.avatar} alt={comm.name} size="md" />
                     <div className="min-w-0">
                       <Link
                         to={`/communities/${comm.slug}`}
-                        className="text-xs font-bold text-white hover:text-violet-400 transition-colors block truncate"
+                        className="text-xs font-bold text-fg hover:text-primary-text transition-colors block truncate"
                       >
-                        {comm.name}
+                        <bdi>{comm.name}</bdi>
                       </Link>
-                      <span className="text-[11px] text-slate-500 block">
+                      <span className="text-[11px] text-fg-muted block">
                         {comm.memberCount.toLocaleString()} members · {comm.category}
                       </span>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-400 line-clamp-2">{comm.description}</p>
+                  <p className="text-xs text-fg-muted line-clamp-2" dir="auto">{comm.description}</p>
                   <Link to={`/communities/${comm.slug}`} className="w-full">
                     <Button variant="outline" size="sm" fullWidth className="text-xs">
-                      View Community
+                      {t('viewCommunity')}
                     </Button>
                   </Link>
                 </div>
@@ -226,17 +226,17 @@ export const ExplorePage: React.FC = () => {
 
         {/* If Posts tab or All */}
         {loading ? (
-          <div className="text-xs text-slate-500 py-6 text-center">Searching VORTEX...</div>
+          <div className="text-xs text-fg-subtle py-6 text-center">{t('searchingVortex')}</div>
         ) : (activeTab === 'posts' || activeTab === 'all') && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <h3 className="font-bold text-sm text-slate-100">{t('postsTab')}</h3>
+              <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <h3 className="font-bold text-sm text-fg">{t('postsTab')}</h3>
             </div>
             {posts.length === 0 ? (
               <EmptyState
                 icon={<Search className="w-6 h-6" />}
-                title="No results found"
+                title={t('noResultsFound')}
                 description={`We couldn't find any results matching "${query}". Try searching for #photography, #design, or technology.`}
               />
             ) : (

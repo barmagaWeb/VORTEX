@@ -1,5 +1,9 @@
 # VORTEX — Connect. Share. Discover.
 
+## Brand attribution
+
+The supplied AUREX identity is included as the creator/developer brand for VORTEX in the landing-page footer and page metadata. The project files do not establish a registered legal company name, so the site intentionally does not claim that “AUREX” is an incorporated entity (for example, “AUREX Inc.” or “AUREX LLC”). Use the legal entity name only after it has been confirmed from official registration records.
+
 VORTEX is a bilingual (Arabic/English), RTL/LTR, dark/light social-network application built with Vite, React 18, TypeScript, Tailwind CSS, React Router, and Supabase.
 
 > **Production status: NOT READY.** The current source removes the paid-membership UI and active Reels/video product surface, adds image-only upload paths, and expands messaging and Realtime support. The SQL migrations have not been executed against a live/local Supabase database in this delivery, and dependencies could not be fully installed here. Read `IMPLEMENTATION_DELIVERY_REPORT.md` and `PRODUCTION_READINESS_REPORT.md` before deploying.

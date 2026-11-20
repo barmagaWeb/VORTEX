@@ -86,9 +86,9 @@ export const ProfilePage: React.FC = () => {
         isFollowPending: Boolean(res.isPending),
         followersCount: res.newFollowersCount,
       });
-      showToast(res.isPending ? t('followRequestSent') : res.isFollowing ? `You followed ${profileUser.name}` : `Unfollowed ${profileUser.name}`);
+      showToast(res.isPending ? t('followRequestSent') : res.isFollowing ? t('toastFollowed', { name: profileUser.name }) : t('toastUnfollowed', { name: profileUser.name }));
     } catch {
-      showToast('Could not update follow status', 'error');
+      showToast(t('toastFollowFailed'), 'error');
     }
   };
 
@@ -98,7 +98,7 @@ export const ProfilePage: React.FC = () => {
       const conv = await messagingService.getOrCreateConversation(profileUser.id);
       navigate(`/messages?conv=${conv.id}`);
     } catch {
-      showToast('Could not open messaging', 'error');
+      showToast(t('toastOpenMessagingFailed'), 'error');
     }
   };
 
@@ -116,9 +116,9 @@ export const ProfilePage: React.FC = () => {
       });
       setProfileUser(updated);
       setIsEditModalOpen(false);
-      showToast('Profile updated successfully!');
+      showToast(t('toastProfileUpdated'));
     } catch {
-      showToast('Failed to save profile changes', 'error');
+      showToast(t('toastProfileSaveFailed'), 'error');
     } finally {
       setIsSaving(false);
     }
@@ -126,14 +126,14 @@ export const ProfilePage: React.FC = () => {
 
   const handleShareProfile = () => {
     navigator.clipboard?.writeText?.(window.location.href);
-    showToast('Profile URL copied to clipboard!');
+    showToast(t('toastProfileLinkCopied'));
   };
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-slate-500">
-        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-        <span>Loading profile...</span>
+      <div className="p-8 text-center text-fg-subtle">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <span>{t('loadingProfile')}</span>
       </div>
     );
   }
@@ -141,8 +141,8 @@ export const ProfilePage: React.FC = () => {
   if (!profileUser) {
     return (
       <EmptyState
-        title="User not found"
-        description="The account you are looking for does not exist or has been removed."
+        title={t('userNotFound')}
+        description={t('userNotFoundDescription')}
         className="m-6"
       />
     );
@@ -157,72 +157,74 @@ export const ProfilePage: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Cover Image matching reference image top-right */}
-      <div className="relative h-48 sm:h-64 w-full bg-slate-900 overflow-hidden">
+    <div className="flex flex-col min-h-[100dvh]">
+      {/* Cover Image */}
+      <div className="relative h-48 sm:h-64 w-full bg-surface-elevated overflow-hidden">
         {profileUser.coverImage ? (
           <img
             src={profileUser.coverImage}
-            alt="Profile cover"
+            alt={t('profileCoverAlt')}
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-violet-900 to-blue-900" />
+          <div className="w-full h-full bg-gradient-to-r from-violet-600/30 to-blue-600/30" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg via-transparent to-black/20" />
       </div>
 
-      {/* Profile Header Details matching reference image */}
+      {/* Profile Header Details */}
       <div className="px-5 sm:px-8 pb-5 relative -mt-16 sm:-mt-20 flex flex-col items-center text-center">
-        {/* Avatar with glow and verified badge */}
+        {/* Avatar with ring */}
         <div className="relative inline-block mb-3">
           <Avatar
             src={profileUser.avatar}
             alt={profileUser.name}
             size="2xl"
-            className="ring-4 ring-slate-950 shadow-2xl"
+            className="ring-4 ring-bg shadow-2xl"
           />
         </div>
 
         {/* Name & Username */}
         <div className="flex items-center gap-1.5 justify-center">
-          <h1 className="text-xl sm:text-2xl font-black text-white">{profileUser.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-fg">
+            <bdi>{profileUser.name}</bdi>
+          </h1>
           {profileUser.verified && <Badge variant="verified" size="md" />}
         </div>
-        <span className="text-xs sm:text-sm text-slate-400 mt-0.5">@{profileUser.username}</span>
+        <span className="text-xs sm:text-sm text-fg-muted mt-0.5" dir="ltr">@{profileUser.username}</span>
 
-        {/* Stats Row matching reference image: 245 Posts, 12.5K Followers, 136 Following */}
-        <div className="flex items-center justify-center gap-6 sm:gap-8 my-4 py-2 px-6 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+        {/* Stats Row */}
+        <div className="flex items-center justify-center gap-6 sm:gap-8 my-4 py-2 px-6 rounded-2xl bg-surface border border-border shadow-card">
           <div className="flex flex-col items-center">
-            <span className="text-base sm:text-lg font-black text-white">{profileUser.postsCount}</span>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t('posts')}</span>
+            <span className="text-base sm:text-lg font-black text-fg">{profileUser.postsCount}</span>
+            <span className="text-[11px] font-semibold text-fg-muted uppercase tracking-wider">{t('posts')}</span>
           </div>
-          <div className="w-px h-8 bg-slate-800" />
+          <div className="w-px h-8 bg-border" />
           <div className="flex flex-col items-center">
-            <span className="text-base sm:text-lg font-black text-white">
+            <span className="text-base sm:text-lg font-black text-fg">
               {profileUser.followersCount >= 1000 ? `${(profileUser.followersCount / 1000).toFixed(1)}K` : profileUser.followersCount}
             </span>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t('followers')}</span>
+            <span className="text-[11px] font-semibold text-fg-muted uppercase tracking-wider">{t('followers')}</span>
           </div>
-          <div className="w-px h-8 bg-slate-800" />
+          <div className="w-px h-8 bg-border" />
           <div className="flex flex-col items-center">
-            <span className="text-base sm:text-lg font-black text-white">{profileUser.followingCount}</span>
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{t('following')}</span>
+            <span className="text-base sm:text-lg font-black text-fg">{profileUser.followingCount}</span>
+            <span className="text-[11px] font-semibold text-fg-muted uppercase tracking-wider">{t('following')}</span>
           </div>
         </div>
 
         {/* Bio */}
         {profileUser.bio && (
-          <p className="text-xs sm:text-sm text-slate-200 max-w-lg leading-relaxed font-normal">
+          <p className="text-xs sm:text-sm text-fg max-w-lg leading-relaxed font-normal" dir="auto">
             {profileUser.bio}
           </p>
         )}
 
         {/* Meta tags (location, website, joined date) */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-slate-400 mt-3">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-fg-muted mt-3">
           {profileUser.location && (
             <div className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-violet-400" />
+              <MapPin className="w-3.5 h-3.5 text-primary" />
               <span>{profileUser.location}</span>
             </div>
           )}
@@ -231,19 +233,20 @@ export const ProfilePage: React.FC = () => {
               href={profileUser.website}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1 text-violet-400 hover:underline"
+              className="flex items-center gap-1 text-primary-text hover:underline"
+              dir="ltr"
             >
               <LinkIcon className="w-3.5 h-3.5" />
               <span>{profileUser.website.replace('https://', '')}</span>
             </a>
           )}
           <div className="flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
+            <Calendar className="w-3.5 h-3.5 text-fg-subtle" />
             <span>{t('joined')} {profileUser.joinedDate}</span>
           </div>
         </div>
 
-        {/* Action Buttons matching reference image */}
+        {/* Action Buttons */}
         <div className="flex items-center gap-3 mt-5">
           {isOwnProfile ? (
             <Button
@@ -268,7 +271,7 @@ export const ProfilePage: React.FC = () => {
                 onClick={handleStartMessage}
                 variant="outline"
                 size="md"
-                leftIcon={<Mail className="w-4 h-4 text-violet-400" />}
+                leftIcon={<Mail className="w-4 h-4 text-primary" />}
               >
                 {t('messages')}
               </Button>
@@ -277,8 +280,9 @@ export const ProfilePage: React.FC = () => {
 
           <button
             onClick={handleShareProfile}
-            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white transition-colors"
-            title="Share profile"
+            className="p-2.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-border text-fg-muted hover:text-fg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            title={t('shareProfile')}
+            aria-label={t('shareProfile')}
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -300,8 +304,8 @@ export const ProfilePage: React.FC = () => {
         {activeTab === 'posts' && (
           userPosts.length === 0 ? (
             <EmptyState
-              title="No posts yet"
-              description={`${profileUser.name} hasn't posted anything yet.`}
+              title={t('noPostsYet')}
+              description={t('noPostsYetDescription', { name: profileUser.name })}
             />
           ) : (
             <div className="space-y-4">
@@ -312,7 +316,7 @@ export const ProfilePage: React.FC = () => {
           )
         )}
 
-        {/* Media 6-grid gallery matching reference image top-right */}
+        {/* Media 6-grid gallery */}
         {activeTab === 'media' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {[
@@ -325,11 +329,11 @@ export const ProfilePage: React.FC = () => {
             ].map((img, i) => (
               <div
                 key={i}
-                className="group relative h-36 sm:h-44 rounded-xl overflow-hidden bg-slate-900 border border-slate-800"
+                className="group relative h-36 sm:h-44 rounded-xl overflow-hidden bg-surface border border-border"
               >
                 <img
                   src={img}
-                  alt={`Gallery ${i}`}
+                  alt={t('galleryImageAlt', { index: i + 1 })}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   loading="lazy"
                 />
@@ -340,8 +344,8 @@ export const ProfilePage: React.FC = () => {
 
         {(activeTab === 'replies' || activeTab === 'likes' || activeTab === 'saved') && (
           <EmptyState
-            title={`No ${activeTab} to show`}
-            description={`Activity in this tab will show up here as ${profileUser.name} interacts.`}
+            title={t('nothingInTab', { tab: t(activeTab) })}
+            description={t('tabActivityHint', { name: profileUser.name })}
           />
         )}
       </div>
@@ -379,7 +383,7 @@ export const ProfilePage: React.FC = () => {
             label={t('locationLabel')}
             value={editLocation}
             onChange={(e) => setEditLocation(e.target.value)}
-            placeholder="e.g. Cairo, Egypt"
+            placeholder={t('locationPlaceholder')}
           />
           <Input
             label={t('websiteLabel')}
@@ -391,13 +395,13 @@ export const ProfilePage: React.FC = () => {
             label={t('avatarPhoto')}
             value={editAvatar}
             onChange={(e) => setEditAvatar(e.target.value)}
-            placeholder="Image URL"
+            placeholder={t('imageUrlPlaceholder')}
           />
           <Input
             label={t('coverPhoto')}
             value={editCover}
             onChange={(e) => setEditCover(e.target.value)}
-            placeholder="Cover Image URL"
+            placeholder={t('coverImageUrlPlaceholder')}
           />
         </div>
       </Modal>

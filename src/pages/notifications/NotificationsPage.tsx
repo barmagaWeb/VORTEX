@@ -37,7 +37,7 @@ export const NotificationsPage: React.FC = () => {
       setLoadError(null);
     } catch (error) {
       setNotifications([]);
-      setLoadError(error instanceof Error ? error.message : 'Failed to load notifications');
+      setLoadError(error instanceof Error ? error.message : t('notificationsLoadFailed'));
     } finally {
       setLoading(false);
     }
@@ -94,21 +94,21 @@ export const NotificationsPage: React.FC = () => {
       case 'like':
         return <Heart className="w-4 h-4 text-rose-500 fill-current" />;
       case 'comment':
-        return <MessageCircle className="w-4 h-4 text-blue-400" />;
+        return <MessageCircle className="w-4 h-4 text-blue-500" />;
       case 'reply':
-        return <CornerDownRight className="w-4 h-4 text-cyan-400" />;
+        return <CornerDownRight className="w-4 h-4 text-primary rtl:rotate-180" />;
       case 'follow':
-        return <UserPlus className="w-4 h-4 text-violet-400" />;
+        return <UserPlus className="w-4 h-4 text-primary" />;
       case 'repost':
-        return <Repeat2 className="w-4 h-4 text-emerald-400" />;
+        return <Repeat2 className="w-4 h-4 text-emerald-500" />;
       case 'community':
-        return <Users className="w-4 h-4 text-amber-400" />;
+        return <Users className="w-4 h-4 text-amber-500" />;
       case 'message':
-        return <Mail className="w-4 h-4 text-sky-400" />;
+        return <Mail className="w-4 h-4 text-primary" />;
       case 'mention':
-        return <MessageCircle className="w-4 h-4 text-cyan-400" />;
+        return <MessageCircle className="w-4 h-4 text-primary" />;
       default:
-        return <Bell className="w-4 h-4 text-slate-400" />;
+        return <Bell className="w-4 h-4 text-fg-subtle" />;
     }
   };
 
@@ -134,21 +134,21 @@ export const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 p-4 space-y-3">
+    <div className="flex flex-col min-h-[100dvh]">
+      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-black text-white">{t('notifications')}</h1>
+          <h1 className="text-lg font-black text-fg">{t('notifications')}</h1>
           <div className="flex items-center gap-2">
             <button
               onClick={() => void handleMarkAllRead()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-violet-400 hover:text-violet-300 hover:bg-slate-800/80 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-primary-text hover:bg-surface-hover transition-colors min-h-[36px]"
             >
               <CheckCheck className="w-4 h-4" />
               <span>{t('markAllRead')}</span>
             </button>
             <button
               onClick={() => void handleClearAll()}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800/80 transition-colors"
+              className="p-1.5 rounded-lg text-fg-muted hover:text-danger hover:bg-surface-hover transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
               title={t('clearAll')}
               aria-label={t('clearAll')}
             >
@@ -165,9 +165,13 @@ export const NotificationsPage: React.FC = () => {
       </div>
 
       <div className="p-4 sm:p-6 space-y-3">
-        {loadError && <div role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-300">{t('notificationsLoadFailed')}</div>}
+        {loadError && (
+          <div role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger-text">
+            {t('notificationsLoadFailed')}
+          </div>
+        )}
         {loading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">{t('loadingNotifications')}</div>
+          <div className="p-8 text-center text-fg-subtle text-xs">{t('loadingNotifications')}</div>
         ) : notifications.length === 0 ? (
           <EmptyState
             icon={<Bell className="w-6 h-6" />}
@@ -180,36 +184,37 @@ export const NotificationsPage: React.FC = () => {
               <div
                 key={notification.id}
                 onClick={() => void handleMarkAsRead(notification.id)}
-                className={`p-4 rounded-2xl border transition-all flex items-start gap-3.5 cursor-pointer ${
+                className={`p-4 rounded-2xl border transition-all flex items-start gap-3.5 cursor-pointer shadow-sm ${
                   notification.isRead
-                    ? 'bg-slate-900/40 border-slate-800/60 opacity-80'
-                    : 'bg-violet-950/20 border-violet-500/30 shadow-sm'
+                    ? 'bg-surface border-border opacity-90'
+                    : 'bg-primary/10 border-primary/30 shadow-card'
                 }`}
               >
                 <div className="relative shrink-0">
                   <Avatar src={notification.actor.avatar} alt={notification.actor.name} size="md" />
-                  <span className="absolute -bottom-1 -end-1 p-1 rounded-full bg-slate-900 border border-slate-800">
+                  <span className="absolute -bottom-1 -end-1 p-1 rounded-full bg-surface border border-border shadow-sm">
                     {getIconForType(notification.type)}
                   </span>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="text-xs sm:text-sm text-slate-200">
+                  <div className="text-xs sm:text-sm text-fg">
                     <Link
                       to={`/profile/${notification.actor.username}`}
-                      className="font-bold text-white hover:underline me-1"
+                      className="font-bold text-fg hover:text-primary-text hover:underline me-1 transition-colors"
                       onClick={(event) => event.stopPropagation()}
                     >
-                      {notification.actor.name}
+                      <bdi>{notification.actor.name}</bdi>
                     </Link>
-                    {getDescriptionForType(notification.type)}
+                    <span>{getDescriptionForType(notification.type)}</span>
                   </div>
 
                   {notification.postSnippet && (
                     <Link
                       to={getNotificationHref(notification)}
                       onClick={(event) => event.stopPropagation()}
-                      className="block text-xs text-slate-400 mt-1 line-clamp-1 italic bg-slate-950/40 px-2.5 py-1 rounded-lg border border-slate-800/50 hover:text-slate-200"
+                      className="block text-xs text-fg-muted mt-1 line-clamp-1 italic bg-surface-elevated px-2.5 py-1 rounded-lg border border-border hover:text-fg transition-colors"
+                      dir="auto"
                     >
                       “{notification.postSnippet}”
                     </Link>
@@ -218,14 +223,14 @@ export const NotificationsPage: React.FC = () => {
                   <Link
                     to={getNotificationHref(notification)}
                     onClick={(event) => event.stopPropagation()}
-                    className="text-[11px] text-slate-500 mt-1.5 inline-block hover:text-violet-300"
+                    className="text-[11px] text-fg-subtle mt-1.5 inline-block hover:text-primary-text transition-colors"
                   >
                     {notification.createdAt}
                   </Link>
                 </div>
 
                 {!notification.isRead && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-violet-500 shrink-0 mt-2" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0 mt-2" />
                 )}
               </div>
             ))}

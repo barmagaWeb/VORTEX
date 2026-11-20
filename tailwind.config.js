@@ -8,6 +8,48 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Semantic design tokens powered by CSS variables
+        bg: 'rgb(var(--v-bg) / <alpha-value>)',
+        surface: {
+          DEFAULT: 'rgb(var(--v-surface) / <alpha-value>)',
+          elevated: 'rgb(var(--v-surface-elevated) / <alpha-value>)',
+          hover: 'rgb(var(--v-surface-hover) / <alpha-value>)',
+          card: 'rgb(var(--v-surface-card) / <alpha-value>)',
+          active: 'rgb(var(--v-surface-active) / <alpha-value>)',
+        },
+        border: {
+          DEFAULT: 'rgb(var(--v-border) / <alpha-value>)',
+          subtle: 'rgb(var(--v-border-subtle) / <alpha-value>)',
+        },
+        line: 'rgb(var(--v-border) / <alpha-value>)',
+        fg: {
+          DEFAULT: 'rgb(var(--v-fg) / <alpha-value>)',
+          muted: 'rgb(var(--v-fg-muted) / <alpha-value>)',
+          subtle: 'rgb(var(--v-fg-subtle) / <alpha-value>)',
+        },
+        primary: {
+          DEFAULT: 'rgb(var(--v-primary) / <alpha-value>)',
+          hover: 'rgb(var(--v-primary-hover) / <alpha-value>)',
+          fg: 'rgb(var(--v-primary-fg) / <alpha-value>)',
+          text: 'rgb(var(--v-primary-text) / <alpha-value>)',
+        },
+        accent: {
+          DEFAULT: 'rgb(var(--v-accent) / <alpha-value>)',
+          fg: 'rgb(var(--v-accent-fg) / <alpha-value>)',
+        },
+        success: {
+          DEFAULT: 'rgb(var(--v-success) / <alpha-value>)',
+          text: 'rgb(var(--v-success-text) / <alpha-value>)',
+        },
+        warning: 'rgb(var(--v-warning) / <alpha-value>)',
+        danger: {
+          DEFAULT: 'rgb(var(--v-danger) / <alpha-value>)',
+          text: 'rgb(var(--v-danger-text) / <alpha-value>)',
+        },
+        ring: 'rgb(var(--v-ring) / <alpha-value>)',
+        overlay: 'rgb(var(--v-overlay) / <alpha-value>)',
+
+        // Legacy / Palette references preserved for backwards compatibility
         vortex: {
           dark: {
             bg: '#0A0D14',
@@ -60,6 +102,7 @@ export default {
         arabic: ['"IBM Plex Sans Arabic"', '"Cairo"', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
+        'card': 'var(--v-shadow-card)',
         'vortex-glow': '0 0 25px -5px rgba(139, 92, 246, 0.35)',
         'vortex-blue-glow': '0 0 25px -5px rgba(59, 130, 246, 0.35)',
         'card-dark': '0 4px 20px -2px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle2, Globe, Sun, Moon } from 'lucide-react';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { authService } from '../../services';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export const ForgotPasswordPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,28 +28,48 @@ export const ForgotPasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-vortex-dark-bg text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-[100dvh] bg-bg text-fg flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white relative">
+      <div className="absolute top-4 end-4 flex items-center gap-2">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          aria-label={t('toggleLanguage')}
+        >
+          <Globe className="w-4 h-4 text-primary" />
+          <span>{language === 'en' ? 'العربية' : 'English'}</span>
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          title={t('toggleTheme')}
+          aria-label={t('toggleTheme')}
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+        </button>
+      </div>
+
+      <div className="w-full max-w-md space-y-6 my-8">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-4">
             <Logo size="lg" showTagline />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">{t('forgotPasswordTitle')}</h1>
-          <p className="text-xs sm:text-sm text-slate-400">{t('forgotPasswordSubtitle')}</p>
+          <h1 className="text-2xl font-black text-fg tracking-tight">{t('forgotPasswordTitle')}</h1>
+          <p className="text-xs sm:text-sm text-fg-muted">{t('forgotPasswordSubtitle')}</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 shadow-2xl space-y-4">
+        <div className="p-6 rounded-3xl bg-surface border border-border shadow-card space-y-4">
           {isSubmitted ? (
             <div className="text-center space-y-3 py-4">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-              <h3 className="text-base font-bold text-white">Instructions Dispatched</h3>
-              <p className="text-xs text-slate-300">
-                We sent password recovery instructions to <span className="font-semibold text-violet-300">{email}</span>.
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+              <h3 className="text-base font-bold text-fg">{t('resetInstructionsSentTitle')}</h3>
+              <p className="text-xs text-fg-muted">
+                {t('resetInstructionsSentBody')}{' '}
+                <bdi dir="ltr" className="font-semibold text-primary-text">{email}</bdi>.
               </p>
               <div className="pt-2">
                 <Link to="/auth/reset">
                   <Button variant="primary" size="sm" fullWidth>
-                    Proceed to Reset Password Screen (Demo)
+                    {t('proceedToResetDemo')}
                   </Button>
                 </Link>
               </div>
@@ -80,10 +102,10 @@ export const ForgotPasswordPage: React.FC = () => {
         <div className="text-center">
           <Link
             to="/auth/signin"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-fg-muted hover:text-fg transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to sign in</span>
+            <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+            <span>{t('verificationBackToSignIn')}</span>
           </Link>
         </div>
       </div>
@@ -92,7 +114,8 @@ export const ForgotPasswordPage: React.FC = () => {
 };
 
 export const ResetPasswordPage: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
@@ -102,7 +125,7 @@ export const ResetPasswordPage: React.FC = () => {
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('errPasswordMismatch'));
       return;
     }
     setError('');
@@ -111,29 +134,48 @@ export const ResetPasswordPage: React.FC = () => {
       await authService.resetPassword(password);
       setIsSuccess(true);
     } catch {
-      setError('Could not update password');
+      setError(t('errUpdatePasswordFailed'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-vortex-dark-bg text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-[100dvh] bg-bg text-fg flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white relative">
+      <div className="absolute top-4 end-4 flex items-center gap-2">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          aria-label={t('toggleLanguage')}
+        >
+          <Globe className="w-4 h-4 text-primary" />
+          <span>{language === 'en' ? 'العربية' : 'English'}</span>
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          title={t('toggleTheme')}
+          aria-label={t('toggleTheme')}
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+        </button>
+      </div>
+
+      <div className="w-full max-w-md space-y-6 my-8">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-4">
             <Logo size="lg" showTagline />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">{t('resetPasswordTitle')}</h1>
-          <p className="text-xs sm:text-sm text-slate-400">{t('resetPasswordSubtitle')}</p>
+          <h1 className="text-2xl font-black text-fg tracking-tight">{t('resetPasswordTitle')}</h1>
+          <p className="text-xs sm:text-sm text-fg-muted">{t('resetPasswordSubtitle')}</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 shadow-2xl space-y-4">
+        <div className="p-6 rounded-3xl bg-surface border border-border shadow-card space-y-4">
           {isSuccess ? (
             <div className="text-center space-y-3 py-4">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-              <h3 className="text-base font-bold text-white">Password Updated!</h3>
-              <p className="text-xs text-slate-300">{t('passwordResetSuccess')}</p>
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+              <h3 className="text-base font-bold text-fg">{t('passwordUpdatedTitle')}</h3>
+              <p className="text-xs text-fg-muted">{t('passwordResetSuccess')}</p>
               <div className="pt-2">
                 <Link to="/auth/signin">
                   <Button variant="primary" size="md" fullWidth>
@@ -149,7 +191,7 @@ export const ResetPasswordPage: React.FC = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="New password (min 6 characters)"
+                placeholder={t('newPasswordPlaceholder')}
                 required
               />
               <Input
@@ -157,10 +199,10 @@ export const ResetPasswordPage: React.FC = () => {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
+                placeholder={t('confirmNewPasswordPlaceholder')}
                 required
               />
-              {error && <p className="text-xs text-rose-400 font-semibold">{error}</p>}
+              {error && <p className="text-xs text-danger-text font-semibold">{error}</p>}
               <Button
                 type="submit"
                 variant="primary"

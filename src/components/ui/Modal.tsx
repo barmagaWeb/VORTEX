@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,6 +11,23 @@ interface ModalProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+  '[contenteditable="true"]',
+].join(',');
+
+const getFocusable = (root: HTMLElement | null): HTMLElement[] =>
+  root
+    ? Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (el) => el.getAttribute('aria-hidden') !== 'true' && !el.closest('[hidden]')
+      )
+    : [];
+
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -18,71 +36,136 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = 'md',
 }) => {
+  const { t } = useLanguage();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  // Keep the latest onClose without re-running the focus/keyboard effects when callers pass inline arrows.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Esc-to-close, Tab focus trap and body scroll lock while open.
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = getFocusable(dialog);
+      if (focusable.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      const isInside = !!active && dialog.contains(active);
+
+      if (e.shiftKey) {
+        if (!isInside || active === first || active === dialog) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (!isInside || active === last) {
+        e.preventDefault();
+        first.focus();
       }
     };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  // Move focus into the dialog on open; restore it to the opener on close/unmount.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const opener = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.contains(document.activeElement)) {
+      // Prefer the first field/action in the content over the header's close button.
+      const focusable = getFocusable(dialog);
+      const target = focusable.find((el) => !el.hasAttribute('data-modal-close')) ?? focusable[0] ?? dialog;
+      target.focus();
+    }
+
+    return () => {
+      if (opener && opener.isConnected && typeof opener.focus === 'function') {
+        opener.focus();
+      }
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const maxWidthClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    '2xl': 'max-w-2xl',
+    sm: 'sm:max-w-sm',
+    md: 'sm:max-w-md',
+    lg: 'sm:max-w-lg',
+    xl: 'sm:max-w-xl',
+    '2xl': 'sm:max-w-2xl',
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 bg-overlay/70 backdrop-blur-sm transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Dialog card */}
+      {/* Dialog card - bottom sheet on mobile, centered card on tablet/desktop */}
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidthClasses[maxWidth]} bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl shadow-black/80 overflow-hidden transform transition-all text-slate-100 z-10`}
+        aria-labelledby={title ? titleId : undefined}
+        aria-label={title ? undefined : 'Dialog'}
+        tabIndex={-1}
+        className={`relative w-full ${maxWidthClasses[maxWidth]} bg-surface-elevated border border-border rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden transform transition-all text-fg z-10 max-h-[90dvh] sm:max-h-[85dvh] flex flex-col focus:outline-none`}
       >
+        {/* Mobile handle indicator */}
+        <div className="sm:hidden flex justify-center pt-2 pb-1">
+          <div className="w-10 h-1 rounded-full bg-border" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 sm:py-4 border-b border-border shrink-0">
           {title ? (
-            <h3 className="text-lg font-bold text-slate-100 tracking-tight">{title}</h3>
+            <h3 id={titleId} className="text-base sm:text-lg font-bold text-fg tracking-tight">
+              {title}
+            </h3>
           ) : (
             <div />
           )}
           <button
+            type="button"
+            data-modal-close
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
-            aria-label="Close dialog"
+            className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary min-w-[36px] min-h-[36px] flex items-center justify-center"
+            aria-label={t('closeDialog')}
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-6 py-5 max-h-[75vh] overflow-y-auto">{children}</div>
+        <div className="px-5 sm:px-6 py-4 sm:py-5 overflow-y-auto flex-1">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-3.5 bg-slate-950/60 border-t border-slate-800/80 flex items-center justify-end gap-3">
+          <div className="px-5 sm:px-6 py-3.5 bg-surface border-t border-border flex items-center justify-end gap-3 shrink-0">
             {footer}
           </div>
         )}

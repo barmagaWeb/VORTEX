@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -8,6 +9,7 @@ interface LogoProps {
 }
 
 export const Logo: React.FC<LogoProps> = ({ size = 'md', showTagline = false, clickable = true }) => {
+  const { t } = useLanguage();
   const iconSizes = {
     sm: 'w-7 h-7',
     md: 'w-9 h-9',
@@ -30,7 +32,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showTagline = false, cl
           viewBox="0 0 48 48"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full drop-shadow-[0_0_12px_rgba(139,92,246,0.6)] transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full drop-shadow-[0_0_12px_rgba(139,92,246,0.5)] transition-transform duration-300 group-hover:scale-105"
         >
           <defs>
             <linearGradient id="vortexGradient" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
@@ -58,13 +60,13 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showTagline = false, cl
 
       <div className="flex flex-col">
         <span
-          className={`font-black tracking-tight font-sans text-slate-100 group-hover:text-white transition-colors leading-none ${textSizes[size]}`}
+          className={`font-black tracking-tight font-sans text-fg group-hover:text-primary-text transition-colors leading-none ${textSizes[size]}`}
         >
           VORTEX
         </span>
         {showTagline && (
-          <span className="text-[10px] tracking-widest uppercase font-semibold text-slate-400 mt-1">
-            Connect. Share. Discover.
+          <span className="text-[10px] tracking-widest uppercase rtl:tracking-normal rtl:normal-case font-semibold text-fg-muted mt-1">
+            {t('tagline')}
           </span>
         )}
       </div>
@@ -73,7 +75,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showTagline = false, cl
 
   if (clickable) {
     return (
-      <Link to="/" className="inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 rounded-lg">
+      <Link to="/" className="inline-flex focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
         {content}
       </Link>
     );

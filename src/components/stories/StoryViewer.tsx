@@ -5,6 +5,7 @@ import { StoryGroup } from '../../types';
 import { storiesService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface StoryViewerProps {
   storyGroups: StoryGroup[];
@@ -23,6 +24,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 }) => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { isRTL, t } = useLanguage();
 
   const [groupIndex, setGroupIndex] = useState(initialGroupIndex);
   const [storyIndex, setStoryIndex] = useState(0);
@@ -98,13 +100,16 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowRight') goToNextStory();
-      if (e.key === 'ArrowLeft') goToPrevStory();
+      // Arrow keys follow reading direction: in RTL, ArrowLeft advances.
+      const forwardKey = isRTL ? 'ArrowLeft' : 'ArrowRight';
+      const backKey = isRTL ? 'ArrowRight' : 'ArrowLeft';
+      if (e.key === forwardKey) goToNextStory();
+      if (e.key === backKey) goToPrevStory();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, goToNextStory, goToPrevStory, onClose]);
+  }, [isOpen, isRTL, goToNextStory, goToPrevStory, onClose]);
 
   // Reset when opened
   useEffect(() => {
@@ -123,7 +128,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
     if (window.confirm('Delete this story?')) {
       try {
         await storiesService.deleteStory(currentStory.id);
-        showToast('Story deleted');
+        showToast(t('toastStoryDeleted'));
         if (onStoryDeleted) onStoryDeleted(currentStory.id);
         if (currentGroup.stories.length <= 1) {
           onClose();
@@ -131,7 +136,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           goToNextStory();
         }
       } catch {
-        showToast('Failed to delete story', 'error');
+        showToast(t('toastStoryDeleteFailed'), 'error');
       }
     }
   };
@@ -144,8 +149,8 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
       onTouchStart={() => setIsPaused(true)}
       onTouchEnd={() => setIsPaused(false)}
     >
-      {/* Central Story Container */}
-      <div className="relative w-full max-w-sm sm:max-w-md h-[90vh] max-h-[800px] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col justify-between">
+      {/* Central Story Container - intentional dark media player */}
+      <div className="relative w-full max-w-sm sm:max-w-md h-[90dvh] max-h-[800px] bg-black rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col justify-between">
         {/* Progress Bars Row */}
         <div className="absolute top-0 inset-x-0 z-30 p-3 pt-4 flex gap-1.5">
           {currentGroup.stories.map((story, idx) => {
@@ -156,7 +161,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             return (
               <div
                 key={story.id}
-                className="flex-1 h-1 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm"
+                className="flex-1 h-1 bg-white/25 rounded-full overflow-hidden backdrop-blur-sm"
               >
                 <div
                   className="h-full bg-white transition-all duration-75 ease-linear rounded-full"
@@ -177,7 +182,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             />
             <div className="flex flex-col text-start">
               <span className="text-xs font-bold text-white leading-tight">
-                {currentStory.author.name}
+                <bdi>{currentStory.author.name}</bdi>
               </span>
               <span className="text-[10px] text-slate-300">
                 {new Date(currentStory.createdAt).toLocaleTimeString([], {
@@ -191,14 +196,15 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
           <div className="flex items-center gap-2">
             {isAuthor && (
               <>
-                <div className="flex items-center gap-1 text-[11px] text-slate-300 bg-black/50 px-2 py-1 rounded-full">
+                <div className="flex items-center gap-1 text-[11px] text-white/80 bg-black/50 px-2 py-1 rounded-full">
                   <Eye className="w-3.5 h-3.5 text-violet-400" />
                   <span>{currentStory.viewsCount}</span>
                 </div>
                 <button
                   onClick={handleDeleteStory}
-                  className="p-1.5 rounded-full bg-black/40 hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 transition-colors"
-                  title="Delete Story"
+                  className="p-1.5 rounded-full bg-black/40 hover:bg-rose-500/20 text-white/80 hover:text-rose-400 transition-colors"
+                  title={t('deleteStory')}
+                  aria-label={t('deleteStory')}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -207,6 +213,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
             <button
               onClick={onClose}
               className="p-1.5 rounded-full bg-black/40 hover:bg-black/80 text-white transition-colors"
+              aria-label={t('closeStoryViewer')}
             >
               <X className="w-5 h-5" />
             </button>
@@ -241,28 +248,30 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({
         {/* Bottom Caption Overlay */}
         {currentStory.caption && (
           <div className="absolute bottom-0 inset-x-0 z-30 p-5 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
-            <p className="text-xs sm:text-sm text-white text-center font-medium leading-relaxed drop-shadow-md">
+            <p className="text-xs sm:text-sm text-white text-center font-medium leading-relaxed drop-shadow-md" dir="auto">
               {currentStory.caption}
             </p>
           </div>
         )}
       </div>
 
-      {/* Outer Left / Right Arrows */}
+      {/* Outer Left / Right Arrows with RTL flip */}
       {groupIndex > 0 && (
         <button
           onClick={goToPrevStory}
-          className="hidden sm:flex absolute start-6 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-slate-700 transition-transform hover:scale-110"
+          className="hidden sm:flex absolute start-6 p-3 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition-transform hover:scale-110"
+          aria-label={t('previousStory')}
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-6 h-6 rtl:rotate-180" />
         </button>
       )}
       {(groupIndex < storyGroups.length - 1 || storyIndex < currentGroup.stories.length - 1) && (
         <button
           onClick={goToNextStory}
-          className="hidden sm:flex absolute end-6 p-3 rounded-full bg-slate-900/80 hover:bg-slate-800 text-white border border-slate-700 transition-transform hover:scale-110"
+          className="hidden sm:flex absolute end-6 p-3 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition-transform hover:scale-110"
+          aria-label={t('nextStory')}
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-6 h-6 rtl:rotate-180" />
         </button>
       )}
     </div>

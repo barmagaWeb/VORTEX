@@ -60,9 +60,9 @@ export const CommunitiesPage: React.FC = () => {
           c.id === comm.id ? { ...c, isMember: res.isMember, memberCount: res.memberCount } : c
         )
       );
-      showToast(res.isMember ? `Joined ${comm.name}! 🎉` : `Left ${comm.name}`);
+      showToast(res.isMember ? t('toastJoinedCommunity', { name: comm.name }) : t('toastLeftCommunity', { name: comm.name }));
     } catch {
-      showToast('Could not update membership', 'error');
+      showToast(t('toastMembershipFailed'), 'error');
     }
   };
 
@@ -80,22 +80,22 @@ export const CommunitiesPage: React.FC = () => {
       setIsCreateModalOpen(false);
       setName('');
       setDescription('');
-      showToast(`Created community "${newComm.name}"!`);
+      showToast(t('toastCommunityCreated', { name: newComm.name }));
     } catch {
-      showToast('Failed to create community', 'error');
+      showToast(t('toastCommunityCreateFailed'), 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[100dvh]">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 p-4 space-y-3">
+      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-violet-400" />
-            <h1 className="text-lg font-black text-white">{t('communities')}</h1>
+            <Users className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-black text-fg">{t('communities')}</h1>
           </div>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -113,10 +113,10 @@ export const CommunitiesPage: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors min-h-[32px] ${
                 selectedCategory === cat
-                  ? 'bg-violet-600 text-white shadow-md shadow-violet-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  ? 'bg-primary text-primary-fg shadow-sm'
+                  : 'bg-surface text-fg-muted hover:text-fg border border-border'
               }`}
             >
               {cat}
@@ -128,12 +128,12 @@ export const CommunitiesPage: React.FC = () => {
       {/* Communities Grid */}
       <div className="p-4 sm:p-6 space-y-4">
         {loading ? (
-          <div className="text-xs text-slate-500 text-center py-8">Loading communities...</div>
+          <div className="text-xs text-fg-subtle text-center py-8">{t('loadingCommunities')}</div>
         ) : communities.length === 0 ? (
           <EmptyState
             icon={<Compass className="w-6 h-6" />}
             title={t('noCommunitiesFound')}
-            description="Be the first pioneer to create a community in this category!"
+            description={t('noCommunitiesHint')}
             action={
               <Button
                 variant="primary"
@@ -149,17 +149,17 @@ export const CommunitiesPage: React.FC = () => {
             {communities.map((comm) => (
               <div
                 key={comm.id}
-                className="group rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-violet-500/40 transition-all overflow-hidden flex flex-col justify-between shadow-card-dark"
+                className="group rounded-2xl bg-surface border border-border hover:border-primary/40 transition-all overflow-hidden flex flex-col justify-between shadow-card"
               >
                 {/* Banner & Header */}
                 <div>
-                  <div className="h-24 w-full bg-slate-800 relative overflow-hidden">
+                  <div className="h-24 w-full bg-surface-elevated relative overflow-hidden">
                     <img
                       src={comm.coverImage}
                       alt={comm.name}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent" />
                   </div>
 
                   <div className="p-4 pt-0 relative -mt-8">
@@ -167,18 +167,18 @@ export const CommunitiesPage: React.FC = () => {
                       src={comm.avatar}
                       alt={comm.name}
                       size="lg"
-                      className="ring-4 ring-slate-900 mb-2 shadow-lg"
+                      className="ring-4 ring-surface mb-2 shadow-card"
                     />
                     <Link
                       to={`/communities/${comm.slug}`}
-                      className="font-bold text-sm text-white group-hover:text-violet-300 transition-colors block truncate"
+                      className="font-bold text-sm text-fg group-hover:text-primary-text transition-colors block truncate"
                     >
-                      {comm.name}
+                      <bdi>{comm.name}</bdi>
                     </Link>
-                    <span className="text-[11px] text-slate-400 block mt-0.5">
+                    <span className="text-[11px] text-fg-subtle block mt-0.5">
                       {comm.memberCount.toLocaleString()} {t('membersCount')} · {comm.category}
                     </span>
-                    <p className="text-xs text-slate-300 mt-2 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-fg-muted mt-2 line-clamp-2 leading-relaxed" dir="auto">
                       {comm.description}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export const CommunitiesPage: React.FC = () => {
                 <div className="p-4 pt-0 flex items-center justify-between gap-2">
                   <Link to={`/communities/${comm.slug}`} className="flex-1">
                     <Button variant="outline" size="sm" fullWidth className="text-xs">
-                      View
+                      {t('view')}
                     </Button>
                   </Link>
 
@@ -235,7 +235,7 @@ export const CommunitiesPage: React.FC = () => {
               isLoading={isSubmitting}
               disabled={!name.trim() || !description.trim()}
             >
-              Create
+              {t('create')}
             </Button>
           </>
         }
@@ -245,21 +245,21 @@ export const CommunitiesPage: React.FC = () => {
             label={t('communityName')}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. NextGen Web Architects"
+            placeholder={t('communityNamePlaceholder')}
             required
           />
 
           <div className="space-y-1.5 text-start">
-            <label className="text-xs font-semibold text-slate-300">{t('communityCategory')}</label>
+            <label className="text-xs font-semibold text-fg-muted">{t('communityCategory')}</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full bg-slate-900 text-slate-100 text-sm rounded-xl px-3.5 py-2.5 border border-slate-700 outline-none focus:border-violet-500"
+              className="w-full bg-surface text-fg text-sm rounded-xl px-3.5 py-2.5 border border-border outline-none focus:border-primary"
             >
-              <option value="Technology">Technology</option>
-              <option value="Design & Art">Design & Art</option>
-              <option value="Photography">Photography</option>
-              <option value="Science & Future">Science & Future</option>
+              <option value="Technology">{t('technology')}</option>
+              <option value="Design & Art">{t('design')}</option>
+              <option value="Photography">{t('photography')}</option>
+              <option value="Science & Future">{t('science')}</option>
             </select>
           </div>
 
@@ -267,13 +267,13 @@ export const CommunitiesPage: React.FC = () => {
             label={t('communityDescription')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="What is this community about? Who should join?"
+            placeholder={t('communityDescriptionPlaceholder')}
             rows={3}
             required
           />
 
           <Textarea
-            label="Community Rules (One per line)"
+            label={t('communityRulesLabel')}
             value={rules}
             onChange={(e) => setRules(e.target.value)}
             rows={3}

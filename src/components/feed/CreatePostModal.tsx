@@ -58,7 +58,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
       return;
     }
     if (file.size <= 0 || file.size > MAX_IMAGE_SIZE) {
-      showToast('Image must be smaller than 10 MB.', 'error');
+      showToast(t('toastImageTooLarge'), 'error');
       return;
     }
 
@@ -131,7 +131,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
         <div className="flex items-center gap-3">
           <Avatar src={user?.avatar} alt={user?.name || 'User'} size="md" />
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-slate-100">{user?.name}</span>
+            <span className="text-sm font-bold text-fg"><bdi>{user?.name}</bdi></span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <select
                 value={visibility}
@@ -139,7 +139,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                   const value = event.target.value;
                   if (value === 'public' || value === 'followers' || value === 'private') setVisibility(value);
                 }}
-                className="bg-slate-800 text-slate-300 text-xs rounded-lg px-2 py-0.5 border border-slate-700 outline-none cursor-pointer"
+                className="bg-surface text-fg-muted text-xs rounded-lg px-2 py-0.5 border border-border outline-none cursor-pointer"
               >
                 <option value="public">🌐 {t('public')}</option>
                 <option value="followers">👥 {t('followersOnly')}</option>
@@ -155,25 +155,26 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           placeholder={t('whatsOnYourMind')}
           rows={4}
           maxLength={10000}
-          className="w-full bg-slate-950/50 rounded-xl p-3.5 text-slate-100 placeholder-slate-500 text-sm border border-slate-800/80 outline-none focus:border-violet-500/80 resize-none"
+          dir="auto"
+          className="w-full bg-surface-elevated/50 rounded-xl p-3.5 text-fg placeholder:text-fg-subtle text-sm border border-border outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 resize-none transition-all"
         />
-        <div className="flex justify-end text-[11px] text-slate-500">{content.length}/10000</div>
+        <div className="flex justify-end text-[11px] text-fg-subtle">{content.length}/10000</div>
 
-        <div className="flex items-center gap-2 bg-slate-950/40 px-3 py-2 rounded-xl border border-slate-800">
-          <Tag className="w-4 h-4 text-violet-400 shrink-0" />
+        <div className="flex items-center gap-2 bg-surface px-3 py-2 rounded-xl border border-border">
+          <Tag className="w-4 h-4 text-primary shrink-0" />
           <input
             type="text"
             value={tagsInput}
             onChange={(event) => setTagsInput(event.target.value.slice(0, 1000))}
             placeholder={t('addTagsPlaceholder')}
             maxLength={1000}
-            className="w-full bg-transparent text-xs text-slate-200 placeholder-slate-500 outline-none"
+            className="w-full bg-transparent text-xs text-fg placeholder:text-fg-subtle outline-none"
           />
         </div>
 
         <div className="space-y-2 pt-1">
-          <div className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-            <Image className="w-4 h-4 text-blue-400" />
+          <div className="text-xs font-semibold text-fg-muted flex items-center gap-1.5">
+            <Image className="w-4 h-4 text-blue-500" />
             <span>{t('photo')}</span>
           </div>
           <input
@@ -187,22 +188,22 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:border-violet-500 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold text-fg hover:border-primary disabled:opacity-50"
           >
-            <UploadCloud className="h-4 w-4" />
+            <UploadCloud className="h-4 w-4 text-primary" />
             {t('uploadMediaFiles')}
           </button>
-          <p className="text-[11px] text-slate-500">JPG, PNG, WEBP or GIF · Up to 10 MB</p>
+          <p className="text-[11px] text-fg-subtle">{t('imageUploadHint')}</p>
 
           {previewUrl && (
-            <div className="relative rounded-xl overflow-hidden max-h-48 bg-slate-950 border border-slate-800 mt-2">
-              <img src={previewUrl} alt="Selected image preview" className="w-full h-full object-cover" />
+            <div className="relative rounded-xl overflow-hidden max-h-48 bg-surface-elevated border border-border mt-2">
+              <img src={previewUrl} alt={t('selectedImagePreview')} className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={clearSelectedImage}
                 disabled={isSubmitting}
                 className="absolute top-2 end-2 p-1.5 rounded-full bg-black/70 text-white hover:bg-black disabled:opacity-50"
-                aria-label="Remove selected image"
+                aria-label={t('removeSelectedImage')}
               >
                 <X className="w-4 h-4" />
               </button>

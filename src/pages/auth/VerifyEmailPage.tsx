@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Mail, RefreshCw } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Mail, RefreshCw, Globe, Sun, Moon } from 'lucide-react';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 
 export const VerifyEmailPage: React.FC = () => {
@@ -16,7 +17,8 @@ export const VerifyEmailPage: React.FC = () => {
     resendVerificationEmail,
     refreshCurrentUser,
   } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -72,23 +74,42 @@ export const VerifyEmailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-vortex-dark-bg text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-[100dvh] bg-bg text-fg flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white relative">
+      <div className="absolute top-4 end-4 flex items-center gap-2">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          aria-label={t('toggleLanguage')}
+        >
+          <Globe className="w-4 h-4 text-primary" />
+          <span>{language === 'en' ? 'العربية' : 'English'}</span>
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          title={t('toggleTheme')}
+          aria-label={t('toggleTheme')}
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+        </button>
+      </div>
+
+      <div className="w-full max-w-md space-y-6 my-8">
         <div className="text-center space-y-3">
           <div className="flex justify-center mb-4">
             <Logo size="lg" showTagline />
           </div>
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-300">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Mail className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">{t('verifyEmailTitle')}</h1>
-          <p className="text-xs sm:text-sm text-slate-400">{t('verifyEmailSubtitle')}</p>
+          <h1 className="text-2xl font-black text-fg tracking-tight">{t('verifyEmailTitle')}</h1>
+          <p className="text-xs sm:text-sm text-fg-muted">{t('verifyEmailSubtitle')}</p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 shadow-2xl space-y-4">
+        <div className="p-6 rounded-3xl bg-surface border border-border shadow-card space-y-4">
           {sent && (
-            <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-300">
-              <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-300">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
               <span>{t('verificationEmailSent')}</span>
             </div>
           )}
@@ -103,14 +124,14 @@ export const VerifyEmailPage: React.FC = () => {
               leftIcon={<Mail className="h-4 w-4" />}
               required
             />
-            {error && <p role="alert" className="text-xs font-semibold text-rose-400">{error}</p>}
+            {error && <p role="alert" className="text-xs font-semibold text-danger-text">{error}</p>}
             <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isSending} className="shadow-vortex-glow">
               <RefreshCw className="me-2 h-4 w-4" />
               {t('resendVerificationEmail')}
             </Button>
           </form>
 
-          <div className="border-t border-slate-800 pt-4">
+          <div className="border-t border-border pt-4">
             <Button
               type="button"
               variant="secondary"
@@ -125,8 +146,8 @@ export const VerifyEmailPage: React.FC = () => {
         </div>
 
         <div className="text-center">
-          <Link to="/auth/signin" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white">
-            <ArrowLeft className="h-4 w-4" />
+          <Link to="/auth/signin" className="inline-flex items-center gap-1.5 text-xs font-semibold text-fg-muted hover:text-fg transition-colors">
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
             <span>{t('verificationBackToSignIn')}</span>
           </Link>
         </div>

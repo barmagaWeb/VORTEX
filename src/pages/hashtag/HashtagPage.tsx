@@ -35,24 +35,25 @@ export const HashtagPage: React.FC = () => {
   }, [fetchTaggedPosts]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[100dvh]">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 p-4">
+      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               to="/explore"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+              aria-label={t('backToExplore')}
             >
               <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-400">
+              <div className="w-9 h-9 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center text-primary">
                 <Hash className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-lg font-black text-white tracking-tight">#{cleanTag}</h1>
-                <span className="text-xs text-slate-400">
+                <h1 className="text-lg font-black text-fg tracking-tight" dir="ltr">#{cleanTag}</h1>
+                <span className="text-xs text-fg-muted">
                   {posts.length} {t('posts')}
                 </span>
               </div>
@@ -61,8 +62,9 @@ export const HashtagPage: React.FC = () => {
 
           <button
             onClick={fetchTaggedPosts}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            title="Refresh"
+            className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+            title={t('refresh')}
+            aria-label={t('refresh')}
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -74,7 +76,7 @@ export const HashtagPage: React.FC = () => {
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+              <div key={i} className="p-5 rounded-2xl bg-surface border border-border space-y-3 shadow-card">
                 <Skeleton className="w-1/3 h-4 rounded" />
                 <Skeleton className="w-full h-16 rounded-xl" />
               </div>
@@ -84,7 +86,7 @@ export const HashtagPage: React.FC = () => {
           <EmptyState
             icon={<Hash className="w-6 h-6" />}
             title={`${t('postsTaggedWith')} #${cleanTag}`}
-            description="Be the first to create a post using this hashtag!"
+            description={t('hashtagEmptyHint')}
           />
         ) : (
           posts.map((post) => (

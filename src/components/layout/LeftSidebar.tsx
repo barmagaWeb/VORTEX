@@ -73,14 +73,14 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   ];
 
   return (
-    <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 h-screen sticky top-0 px-4 py-5 border-e border-slate-800/80 bg-slate-950/60 backdrop-blur-xl z-20 shrink-0 select-none overflow-y-auto no-scrollbar">
+    <aside className="hidden md:flex flex-col justify-between w-64 lg:w-72 h-[100dvh] sticky top-0 px-4 py-5 border-e border-border bg-surface/85 backdrop-blur-xl z-20 shrink-0 select-none overflow-y-auto no-scrollbar">
       <div className="flex flex-col gap-5">
         {/* Brand Logo */}
         <div className="px-3 pt-1">
           <Logo size="md" showTagline />
         </div>
 
-        {/* Navigation list matching the design */}
+        {/* Navigation list */}
         <nav className="flex flex-col gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -91,9 +91,9 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 className={({ isActive }) =>
                   `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
                     isActive
-                      ? 'bg-violet-600/20 text-white border border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.2)]'
-                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-850/60 hover:bg-slate-800/50'
-                  } ${item.highlight ? 'text-violet-300' : ''}`
+                      ? 'bg-primary/15 text-primary-text border border-primary/30 shadow-sm font-bold'
+                      : 'text-fg-muted hover:text-fg hover:bg-surface-hover'
+                  } ${item.highlight ? 'text-primary-text' : ''}`
                 }
               >
                 <div className="flex items-center gap-3.5">
@@ -121,79 +121,82 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
             {t('createPost')}
           </Button>
         </div>
-
       </div>
 
       {/* User profile snippet & Quick switches */}
-      <div className="pt-4 mt-4 border-t border-slate-800/80 flex flex-col gap-2">
+      <div className="pt-4 mt-4 border-t border-border flex flex-col gap-2">
         {/* Quick controls: Language + Theme */}
-        <div className="flex items-center justify-between px-1 text-xs text-slate-400">
+        <div className="flex items-center justify-between px-1 text-xs text-fg-muted">
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800/80 text-slate-300 hover:text-white transition-colors"
-            title="Toggle Language (العربية / English)"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-surface-hover text-fg-muted hover:text-fg transition-colors"
+            title={t('toggleLanguage')}
+            aria-label={t('toggleLanguage')}
           >
-            <Globe className="w-3.5 h-3.5 text-violet-400" />
+            <Globe className="w-3.5 h-3.5 text-primary" />
             <span className="font-semibold">{language === 'en' ? 'العربية' : 'English'}</span>
           </button>
 
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-800/80 text-slate-300 hover:text-white transition-colors"
-            title="Toggle Dark / Light Theme"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-surface-hover text-fg-muted hover:text-fg transition-colors"
+            title={t('toggleTheme')}
+            aria-label={t('toggleTheme')}
           >
             {theme === 'dark' ? (
               <Sun className="w-3.5 h-3.5 text-amber-400" />
             ) : (
-              <Moon className="w-3.5 h-3.5 text-indigo-400" />
+              <Moon className="w-3.5 h-3.5 text-indigo-500" />
             )}
             <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
           </button>
         </div>
 
         {/* Demo role quick switcher */}
-        {!isSupabaseConfigured() && <div className="px-1">
-          <button
-            onClick={() => switchRole(user?.role === 'admin' ? 'user' : 'admin')}
-            className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-violet-950/30 border border-violet-500/20 text-xs text-violet-300 hover:bg-violet-900/40 transition-colors"
-            title="Switch demo persona"
-          >
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              <span>{user?.role === 'admin' ? 'Active: Admin' : 'Active: User'}</span>
-            </div>
-            <span className="text-[10px] text-slate-400 underline">Switch</span>
-          </button>
-        </div>}
+        {!isSupabaseConfigured() && (
+          <div className="px-1">
+            <button
+              onClick={() => switchRole(user?.role === 'admin' ? 'user' : 'admin')}
+              className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary-text hover:bg-primary/20 transition-colors"
+              title={t('switchDemoPersona')}
+            >
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <span>{user?.role === 'admin' ? t('activeAsAdmin') : t('activeAsUser')}</span>
+              </div>
+              <span className="text-[10px] text-fg-muted underline">{t('switchPersona')}</span>
+            </button>
+          </div>
+        )}
 
         {/* User Card */}
         {user && (
-          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/50 border border-slate-800/60 hover:border-slate-700/80 transition-all">
+          <div className="flex items-center justify-between p-2 rounded-xl bg-surface border border-border hover:border-fg-subtle/40 transition-all shadow-sm">
             <NavLink
               to={`/profile/${user.username}`}
               className="flex items-center gap-2.5 min-w-0 group"
             >
               <Avatar src={user.avatar} alt={user.name} size="sm" isOnline />
               <div className="flex flex-col min-w-0 text-start">
-                <span className="text-xs font-bold text-slate-200 group-hover:text-white truncate">
-                  {user.name}
+                <span className="text-xs font-bold text-fg group-hover:text-primary-text transition-colors truncate">
+                  <bdi>{user.name}</bdi>
                 </span>
-                <span className="text-[11px] text-slate-500 truncate">
+                <span className="text-[11px] text-fg-subtle truncate" dir="ltr">
                   @{user.username}
                 </span>
               </div>
             </NavLink>
             <button
               onClick={logout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+              className="p-1.5 rounded-lg text-fg-muted hover:text-danger hover:bg-danger/10 transition-colors"
               title={t('logout')}
+              aria-label={t('logout')}
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 rtl:-scale-x-100" />
             </button>
           </div>
         )}
       </div>
-
     </aside>
   );
 };

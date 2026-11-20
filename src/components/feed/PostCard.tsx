@@ -58,10 +58,10 @@ export const PostCard: React.FC<PostCardProps> = ({
       setIsLiked(res.isLiked);
       setLikesCount(res.likesCount);
       if (res.isLiked) {
-        showToast('Liked post ❤️');
+        showToast(t('toastPostLiked'));
       }
     } catch {
-      showToast('Could not like post', 'error');
+      showToast(t('toastLikeFailed'), 'error');
     }
   };
 
@@ -70,9 +70,9 @@ export const PostCard: React.FC<PostCardProps> = ({
       const res = await postService.toggleRepost(post.id);
       setIsReposted(res.isReposted);
       setRepostsCount(res.repostsCount);
-      showToast(res.isReposted ? 'Reposted to your feed! 🔁' : 'Removed repost');
+      showToast(res.isReposted ? t('toastReposted') : t('toastRepostRemoved'));
     } catch {
-      showToast('Could not repost', 'error');
+      showToast(t('toastRepostFailed'), 'error');
     }
   };
 
@@ -80,9 +80,9 @@ export const PostCard: React.FC<PostCardProps> = ({
     try {
       const bookmarked = await postService.toggleBookmark(post.id);
       setIsBookmarked(bookmarked);
-      showToast(bookmarked ? 'Saved to Bookmarks 🔖' : 'Removed from Bookmarks');
+      showToast(bookmarked ? t('toastBookmarkSaved') : t('toastBookmarkRemoved'));
     } catch {
-      showToast('Could not update bookmark', 'error');
+      showToast(t('toastBookmarkFailed'), 'error');
     }
   };
 
@@ -90,10 +90,10 @@ export const PostCard: React.FC<PostCardProps> = ({
     try {
       const updated = await postService.updatePost(post.id, editContent);
       setIsEditing(false);
-      showToast('Post updated');
+      showToast(t('toastPostUpdated'));
       if (onPostUpdated) onPostUpdated(updated);
     } catch {
-      showToast('Failed to update post', 'error');
+      showToast(t('toastPostUpdateFailed'), 'error');
     }
   };
 
@@ -101,17 +101,17 @@ export const PostCard: React.FC<PostCardProps> = ({
     if (window.confirm('Are you sure you want to delete this post?')) {
       try {
         await postService.deletePost(post.id);
-        showToast('Post deleted');
+        showToast(t('toastPostDeleted'));
         if (onPostDeleted) onPostDeleted(post.id);
       } catch {
-        showToast('Failed to delete post', 'error');
+        showToast(t('toastPostDeleteFailed'), 'error');
       }
     }
   };
 
   const handleCopyLink = () => {
     navigator.clipboard?.writeText?.(`${window.location.origin}/post/${post.id}`);
-    showToast('Link copied to clipboard!');
+    showToast(t('toastLinkCopied'));
     setShowMenu(false);
   };
 
@@ -124,13 +124,12 @@ export const PostCard: React.FC<PostCardProps> = ({
         reportReason
       );
       setShowReportModal(false);
-      showToast('Report submitted for review. Thank you for keeping VORTEX safe.');
+      showToast(t('toastReportSubmitted'));
     } catch {
-      showToast('Failed to submit report', 'error');
+      showToast(t('toastReportFailed'), 'error');
     }
   };
 
-  // Highlight hashtags nicely
   const renderFormattedContent = (text: string) => {
     const parts = text.split(/(\s+)/);
     return parts.map((part, index) => {
@@ -140,7 +139,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           <Link
             key={index}
             to={`/hashtag/${encodeURIComponent(cleanTag)}`}
-            className="text-violet-400 hover:text-violet-300 font-semibold transition-colors"
+            className="text-primary-text hover:underline font-semibold transition-colors"
           >
             {part}
           </Link>
@@ -151,21 +150,21 @@ export const PostCard: React.FC<PostCardProps> = ({
   };
 
   return (
-    <article className="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700/80 transition-all shadow-card-dark select-none">
+    <article className="p-4 sm:p-5 rounded-2xl bg-surface border border-border hover:border-fg-subtle/30 transition-all shadow-card select-none">
       {/* Community badge if posted in community */}
       {post.communityName && (
-        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold mb-2.5 pb-2 border-b border-slate-800/40">
-          <Users className="w-3.5 h-3.5 text-violet-400" />
+        <div className="flex items-center gap-1.5 text-xs text-fg-muted font-semibold mb-2.5 pb-2 border-b border-border-subtle">
+          <Users className="w-3.5 h-3.5 text-primary" />
           <Link
             to={`/communities/${post.communityId || 'frontend-engineers'}`}
-            className="hover:text-violet-300 transition-colors"
+            className="hover:text-primary-text transition-colors"
           >
             {post.communityName}
           </Link>
         </div>
       )}
 
-      {/* Header matching reference image */}
+      {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link to={`/profile/${post.author.username}`}>
@@ -180,14 +179,14 @@ export const PostCard: React.FC<PostCardProps> = ({
             <div className="flex items-center gap-1.5 flex-wrap">
               <Link
                 to={`/profile/${post.author.username}`}
-                className="font-bold text-sm text-slate-100 hover:text-violet-300 transition-colors"
+                className="font-bold text-sm text-fg hover:text-primary-text transition-colors"
               >
-                {post.author.name}
+                <bdi>{post.author.name}</bdi>
               </Link>
               {post.author.verified && <Badge variant="verified" size="sm" />}
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Link to={`/profile/${post.author.username}`} className="hover:underline">
+            <div className="flex items-center gap-1.5 text-xs text-fg-muted">
+              <Link to={`/profile/${post.author.username}`} className="hover:underline" dir="ltr">
                 @{post.author.username}
               </Link>
               <span>·</span>
@@ -202,45 +201,45 @@ export const PostCard: React.FC<PostCardProps> = ({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors"
-            aria-label="Post options"
+            className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+            aria-label={t('postOptions')}
           >
             <MoreHorizontal className="w-5 h-5" />
           </button>
 
           {showMenu && (
             <div
-              className="absolute end-0 mt-1 w-48 rounded-xl bg-slate-950 border border-slate-800 shadow-2xl py-1.5 z-20 text-xs"
+              className="absolute end-0 mt-1 w-48 rounded-xl bg-surface-elevated border border-border shadow-card py-1.5 z-20 text-xs"
               onClick={() => setShowMenu(false)}
             >
               <button
                 onClick={handleToggleBookmark}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-slate-300 hover:bg-slate-800/80 text-start"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-fg-muted hover:text-fg hover:bg-surface-hover text-start"
               >
-                <Bookmark className="w-4 h-4 text-violet-400" />
+                <Bookmark className="w-4 h-4 text-primary" />
                 <span>{isBookmarked ? t('removeBookmark') : t('bookmarkPost')}</span>
               </button>
 
               <button
                 onClick={handleCopyLink}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-slate-300 hover:bg-slate-800/80 text-start"
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-fg-muted hover:text-fg hover:bg-surface-hover text-start"
               >
-                <Copy className="w-4 h-4 text-blue-400" />
-                <span>Copy Link</span>
+                <Copy className="w-4 h-4 text-blue-500" />
+                <span>{t('copyLink')}</span>
               </button>
 
               {isAuthor ? (
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-slate-300 hover:bg-slate-800/80 text-start"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-fg-muted hover:text-fg hover:bg-surface-hover text-start"
                   >
-                    <Edit2 className="w-4 h-4 text-emerald-400" />
+                    <Edit2 className="w-4 h-4 text-emerald-500" />
                     <span>{t('editPost')}</span>
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-400 hover:bg-rose-500/10 text-start"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-danger-text hover:bg-danger/10 text-start"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span>{t('deletePost')}</span>
@@ -249,7 +248,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               ) : (
                 <button
                   onClick={() => setShowReportModal(true)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-rose-400 hover:bg-rose-500/10 text-start"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-danger-text hover:bg-danger/10 text-start"
                 >
                   <Flag className="w-4 h-4" />
                   <span>{t('reportPost')}</span>
@@ -266,32 +265,32 @@ export const PostCard: React.FC<PostCardProps> = ({
           <textarea
             value={editContent}
             onChange={(e) => setEditContent(e.target.value)}
-            className="w-full bg-slate-950 p-3 rounded-xl text-slate-100 text-sm border border-slate-700 outline-none focus:border-violet-500"
+            className="w-full bg-surface-elevated p-3 rounded-xl text-fg text-sm border border-border outline-none focus:border-primary"
             rows={3}
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setIsEditing(false)}
-              className="text-xs px-3 py-1.5 rounded-lg text-slate-400 hover:text-white"
+              className="text-xs px-3 py-1.5 rounded-lg text-fg-muted hover:text-fg"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               onClick={handleSaveEdit}
-              className="text-xs px-3 py-1.5 rounded-lg bg-violet-600 text-white font-semibold"
+              className="text-xs px-3 py-1.5 rounded-lg bg-primary text-primary-fg font-semibold"
             >
-              Save
+              {t('save')}
             </button>
           </div>
         </div>
       ) : (
         <div className="mt-3">
           {post.feeling && (
-            <div className="inline-block text-xs text-violet-300 font-medium bg-violet-600/15 border border-violet-500/20 px-2.5 py-0.5 rounded-full mb-2">
+            <div className="inline-block text-xs text-primary-text font-medium bg-primary/15 border border-primary/25 px-2.5 py-0.5 rounded-full mb-2">
               {post.feeling}
             </div>
           )}
-          <p className="text-sm sm:text-base text-slate-100 leading-relaxed break-words whitespace-pre-wrap">
+          <p className="text-sm sm:text-base text-fg leading-relaxed break-words whitespace-pre-wrap" dir="auto">
             {renderFormattedContent(post.content)}
           </p>
         </div>
@@ -300,14 +299,14 @@ export const PostCard: React.FC<PostCardProps> = ({
       {/* Media attachments */}
       <MediaGrid images={post.images} />
 
-      {/* Reactions count bar matching reference image ("❤️👍 1.2K", "247 comments · 89 shares") */}
-      <div className="flex items-center justify-between text-xs text-slate-400 py-2.5 mt-2.5 border-b border-slate-800/80">
+      {/* Reactions count bar */}
+      <div className="flex items-center justify-between text-xs text-fg-muted py-2.5 mt-2.5 border-b border-border">
         <div className="flex items-center gap-1.5">
-          <span className="flex items-center -space-x-1">
+          <span className="flex items-center [&>*+*]:-ms-1">
             <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px]">❤️</span>
             <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-[10px]">👍</span>
           </span>
-          <span className="font-semibold text-slate-300">
+          <span className="font-semibold text-fg">
             {likesCount > 0 ? (likesCount >= 1000 ? `${(likesCount / 1000).toFixed(1)}K` : likesCount) : '0'}
           </span>
         </div>
@@ -319,14 +318,14 @@ export const PostCard: React.FC<PostCardProps> = ({
         </div>
       </div>
 
-      {/* Action buttons row matching reference image */}
+      {/* Action buttons row */}
       <div className="flex items-center justify-between pt-2">
         <button
           onClick={handleToggleLike}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors min-h-[44px] ${
             isLiked
-              ? 'text-rose-500 hover:text-rose-400 bg-rose-500/10'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              ? 'text-rose-500 hover:text-rose-600 bg-rose-500/10'
+              : 'text-fg-muted hover:text-fg hover:bg-surface-hover'
           }`}
         >
           <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
@@ -335,10 +334,10 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         <button
           onClick={() => setShowComments(!showComments)}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors min-h-[44px] ${
             showComments
-              ? 'text-violet-400 bg-violet-600/10'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              ? 'text-primary-text bg-primary/10'
+              : 'text-fg-muted hover:text-fg hover:bg-surface-hover'
           }`}
         >
           <MessageCircle className="w-4 h-4" />
@@ -347,10 +346,10 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         <button
           onClick={handleToggleRepost}
-          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors ${
+          className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors min-h-[44px] ${
             isReposted
-              ? 'text-emerald-400 bg-emerald-500/10'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              ? 'text-emerald-500 bg-emerald-500/10'
+              : 'text-fg-muted hover:text-fg hover:bg-surface-hover'
           }`}
         >
           <Repeat2 className="w-4 h-4" />
@@ -359,12 +358,13 @@ export const PostCard: React.FC<PostCardProps> = ({
 
         <button
           onClick={handleToggleBookmark}
-          className={`p-2 rounded-xl transition-colors ${
+          className={`p-2.5 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
             isBookmarked
-              ? 'text-violet-400 bg-violet-600/15'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              ? 'text-primary-text bg-primary/15'
+              : 'text-fg-muted hover:text-fg hover:bg-surface-hover'
           }`}
           title={isBookmarked ? t('removeBookmark') : t('bookmarkPost')}
+          aria-label={isBookmarked ? t('removeBookmark') : t('bookmarkPost')}
         >
           <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
         </button>
@@ -380,37 +380,37 @@ export const PostCard: React.FC<PostCardProps> = ({
 
       {/* Report Modal */}
       {showReportModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full space-y-4">
-            <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-              <Flag className="w-4 h-4 text-rose-400" />
-              <span>Report Post</span>
+        <div className="fixed inset-0 z-50 bg-overlay/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-surface-elevated border border-border rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-card">
+            <h3 className="text-base font-bold text-fg flex items-center gap-2">
+              <Flag className="w-4 h-4 text-danger" />
+              <span>{t('reportPost')}</span>
             </h3>
-            <p className="text-xs text-slate-400">
-              Select the reason for reporting this post to VORTEX Trust & Safety:
+            <p className="text-xs text-fg-muted">
+              {t('reportDescription')}
             </p>
             <select
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
-              className="w-full bg-slate-950 text-slate-200 text-xs p-2.5 rounded-xl border border-slate-700 outline-none"
+              className="w-full bg-surface text-fg text-xs p-2.5 rounded-xl border border-border outline-none focus:border-primary"
             >
-              <option value="Spam or misleading">Spam or misleading</option>
-              <option value="Harassment or hate speech">Harassment or hate speech</option>
-              <option value="Copyright violation">Copyright violation</option>
-              <option value="Inappropriate visual media">Inappropriate visual media</option>
+              <option value="Spam or misleading">{t('reportReasonSpam')}</option>
+              <option value="Harassment or hate speech">{t('reportReasonHarassment')}</option>
+              <option value="Copyright violation">{t('reportReasonCopyright')}</option>
+              <option value="Inappropriate visual media">{t('reportReasonInappropriate')}</option>
             </select>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowReportModal(false)}
-                className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white"
+                className="px-3 py-1.5 rounded-lg text-xs text-fg-muted hover:text-fg"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={handleSubmitReport}
                 className="px-4 py-1.5 rounded-lg text-xs bg-rose-600 text-white font-semibold hover:bg-rose-500"
               >
-                Submit Report
+                {t('submitReport')}
               </button>
             </div>
           </div>

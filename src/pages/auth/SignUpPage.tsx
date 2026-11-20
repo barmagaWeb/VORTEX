@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, AtSign, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, AtSign, Eye, EyeOff, ArrowRight, Globe, Sun, Moon } from 'lucide-react';
 import { Logo } from '../../components/ui/Logo';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 
 export const SignUpPage: React.FC = () => {
   const { register } = useAuth();
-  const { t } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -26,15 +28,15 @@ export const SignUpPage: React.FC = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !username || !email || !password) {
-      setError('Please fill in all required fields');
+      setError(t('errRequiredFields'));
       return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('errPasswordMismatch'));
       return;
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError(t('errPasswordTooShort'));
       return;
     }
     setError('');
@@ -44,30 +46,50 @@ export const SignUpPage: React.FC = () => {
       showToast(t('authSuccessRegister'));
       navigate(newUser.emailVerified === false ? '/auth/verify' : '/feed');
     } catch {
-      setError('Failed to create account');
+      setError(t('errCreateAccountFailed'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-vortex-dark-bg text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-[100dvh] bg-bg text-fg flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white relative">
+      {/* Top right language & theme toggle */}
+      <div className="absolute top-4 end-4 flex items-center gap-2">
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          aria-label={t('toggleLanguage')}
+        >
+          <Globe className="w-4 h-4 text-primary" />
+          <span>{language === 'en' ? 'العربية' : 'English'}</span>
+        </button>
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+          title={t('toggleTheme')}
+          aria-label={t('toggleTheme')}
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+        </button>
+      </div>
+
+      <div className="w-full max-w-md space-y-6 my-8">
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-4">
             <Logo size="lg" showTagline />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">{t('signUpTitle')}</h1>
-          <p className="text-xs sm:text-sm text-slate-400">{t('signUpSubtitle')}</p>
+          <h1 className="text-2xl font-black text-fg tracking-tight">{t('signUpTitle')}</h1>
+          <p className="text-xs sm:text-sm text-fg-muted">{t('signUpSubtitle')}</p>
         </div>
 
-        <form onSubmit={handleSignUp} className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800/80 shadow-2xl space-y-3.5">
+        <form onSubmit={handleSignUp} className="p-6 rounded-3xl bg-surface border border-border shadow-card space-y-3.5">
           <Input
             label={t('displayName')}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Tariq Mansoor"
+            placeholder={t('signUpNamePlaceholder')}
             leftIcon={<User className="w-4 h-4" />}
             required
           />
@@ -93,9 +115,9 @@ export const SignUpPage: React.FC = () => {
           />
 
           <div className="space-y-1.5 text-start">
-            <label className="text-xs font-semibold text-slate-300">{t('passwordLabel')}</label>
+            <label className="text-xs font-semibold text-fg-muted">{t('passwordLabel')}</label>
             <div className="relative flex items-center">
-              <div className="absolute start-3.5 text-slate-400 pointer-events-none">
+              <div className="absolute start-3.5 text-fg-subtle pointer-events-none">
                 <Lock className="w-4 h-4" />
               </div>
               <input
@@ -103,13 +125,14 @@ export const SignUpPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-900/90 text-slate-100 text-sm rounded-xl border border-slate-700/80 hover:border-slate-600 focus:border-violet-500 ps-10 pe-10 py-2.5 outline-none"
+                className="w-full bg-surface text-fg placeholder:text-fg-subtle text-sm rounded-xl border border-border hover:border-fg-subtle/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 ps-10 pe-10 py-2.5 transition-all"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute end-3.5 text-slate-400 hover:text-slate-200"
+                className="absolute end-3.5 text-fg-subtle hover:text-fg p-1"
+                aria-label={showPassword ? t('hidePassword') : t('showPassword')}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -126,7 +149,7 @@ export const SignUpPage: React.FC = () => {
             required
           />
 
-          {error && <p className="text-xs text-rose-400 font-semibold">{error}</p>}
+          {error && <p className="text-xs text-danger-text font-semibold">{error}</p>}
 
           <Button
             type="submit"
@@ -134,16 +157,16 @@ export const SignUpPage: React.FC = () => {
             size="lg"
             fullWidth
             isLoading={isLoading}
-            rightIcon={<ArrowRight className="w-4 h-4" />}
+            rightIcon={<ArrowRight className="w-4 h-4 rtl:rotate-180" />}
             className="shadow-vortex-glow mt-2"
           >
             {t('signup')}
           </Button>
         </form>
 
-        <p className="text-center text-xs text-slate-400">
+        <p className="text-center text-xs text-fg-muted">
           {t('alreadyHaveAccount')}{' '}
-          <Link to="/auth/signin" className="font-bold text-violet-400 hover:underline">
+          <Link to="/auth/signin" className="font-bold text-primary-text hover:underline">
             {t('login')}
           </Link>
         </p>

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Send, Image, Smile, CheckCheck, Users, X } from 'lucide-react';
+import { Search, Send, Image, Smile, CheckCheck, Users, X, ArrowLeft } from 'lucide-react';
 import { Avatar } from '../../components/ui/Avatar';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
@@ -71,7 +71,7 @@ export const MessagesPage: React.FC = () => {
           setActiveConv(null);
         }
       } catch {
-        if (active) showToast('Could not load conversations', 'error');
+        if (active) showToast(t('toastConversationsLoadFailed'), 'error');
       }
     };
     void load();
@@ -92,7 +92,7 @@ export const MessagesPage: React.FC = () => {
         await messagingService.markConversationAsRead(activeConv.id);
         await refreshConversations();
       } catch {
-        if (active) showToast('Could not load messages', 'error');
+        if (active) showToast(t('toastMessagesLoadFailed'), 'error');
       }
     };
     void loadMessages();
@@ -105,9 +105,6 @@ export const MessagesPage: React.FC = () => {
       void refreshConversations();
     });
 
-    // A low-frequency refresh is retained as a recovery path for browsers where
-    // the Realtime socket is temporarily unavailable. Production uses Supabase,
-    // while the development Mock adapter uses its local store.
     const interval = window.setInterval(() => { void loadMessages(); }, isSupabaseConfigured() ? 30000 : 5000);
     return () => {
       active = false;
@@ -182,7 +179,7 @@ export const MessagesPage: React.FC = () => {
       setInputMessage(text);
       setPendingAttachments(attachments);
       setPendingAttachmentPreviews(previews);
-      showToast('Could not send message', 'error');
+      showToast(t('toastMessageSendFailed'), 'error');
     } finally {
       setIsSending(false);
     }
@@ -194,11 +191,11 @@ export const MessagesPage: React.FC = () => {
     if (!files.length || !activeConv || !user) return;
     const remaining = 4 - pendingAttachments.length;
     if (remaining <= 0) {
-      showToast('A message can contain up to four images.', 'error');
+      showToast(t('toastMaxMessageImages'), 'error');
       return;
     }
     const accepted = files.filter((file) => IMAGE_TYPES.has(file.type)).slice(0, remaining);
-    if (accepted.length !== files.length) showToast('Only JPG, PNG, WEBP and GIF images are supported.', 'error');
+    if (accepted.length !== files.length) showToast(t('toastImageTypesOnly'), 'error');
     if (!accepted.length) return;
 
     setIsUploading(true);
@@ -211,7 +208,7 @@ export const MessagesPage: React.FC = () => {
       setPendingAttachmentPreviews((current) => [...current, ...previews].slice(0, 4));
     } catch {
       previews.forEach((preview) => URL.revokeObjectURL(preview));
-      showToast('Image upload failed', 'error');
+      showToast(t('toastImageUploadFailed'), 'error');
     } finally {
       setIsUploading(false);
     }
@@ -233,7 +230,7 @@ export const MessagesPage: React.FC = () => {
       setSelectedMembers([]);
       showToast(t('groupCreated'));
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not create group', 'error');
+      showToast(error instanceof Error ? error.message : t('errCreateGroupFailed'), 'error');
     } finally {
       setIsCreatingGroup(false);
     }
@@ -248,7 +245,7 @@ export const MessagesPage: React.FC = () => {
       setGroupMembers(members);
       setShowManageGroupModal(true);
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not load group members', 'error');
+      showToast(error instanceof Error ? error.message : t('errLoadGroupMembersFailed'), 'error');
     } finally {
       setIsGroupUpdating(false);
     }
@@ -269,7 +266,7 @@ export const MessagesPage: React.FC = () => {
       setActiveConv(convs.find((item) => item.id === activeConv.id) || { ...activeConv, groupName: manageGroupName.trim() });
       showToast(t('groupRenamed'));
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not rename group', 'error');
+      showToast(error instanceof Error ? error.message : t('errRenameGroupFailed'), 'error');
     } finally {
       setIsGroupUpdating(false);
     }
@@ -285,7 +282,7 @@ export const MessagesPage: React.FC = () => {
       setManageMemberResults([]);
       showToast(t('memberAdded'));
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not add member', 'error');
+      showToast(error instanceof Error ? error.message : t('errAddMemberFailed'), 'error');
     } finally {
       setIsGroupUpdating(false);
     }
@@ -299,7 +296,7 @@ export const MessagesPage: React.FC = () => {
       await reloadGroupMembers();
       showToast(t('memberRemoved'));
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not remove member', 'error');
+      showToast(error instanceof Error ? error.message : t('errRemoveMemberFailed'), 'error');
     } finally {
       setIsGroupUpdating(false);
     }
@@ -315,7 +312,7 @@ export const MessagesPage: React.FC = () => {
       await refreshConversations();
       showToast(t('groupLeft'));
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Could not leave group', 'error');
+      showToast(error instanceof Error ? error.message : t('errLeaveGroupFailed'), 'error');
     } finally {
       setIsGroupUpdating(false);
     }
@@ -328,16 +325,17 @@ export const MessagesPage: React.FC = () => {
   );
 
   return (
-    <div className="flex h-screen max-h-screen bg-slate-950 overflow-hidden">
-      <div className={`w-full md:w-80 lg:w-96 border-e border-slate-800/80 flex flex-col bg-slate-950/60 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-4 border-b border-slate-800/80 space-y-3">
+    <div className="flex h-[100dvh] max-h-[100dvh] bg-bg overflow-hidden text-fg">
+      {/* Conversations List Panel */}
+      <div className={`w-full md:w-80 lg:w-96 border-e border-border flex flex-col bg-surface/50 ${activeConv ? 'hidden md:flex' : 'flex'}`}>
+        <div className="p-4 border-b border-border space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h1 className="text-lg font-black text-white">{t('messages')}</h1>
+            <h1 className="text-lg font-black text-fg">{t('messages')}</h1>
             <button
               type="button"
               onClick={() => setShowGroupModal(true)}
               disabled={!isSupabaseConfigured()}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-violet-500/30 bg-violet-600/15 px-3 py-2 text-[11px] font-semibold text-violet-200 hover:bg-violet-600/25 disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-[11px] font-semibold text-primary-text hover:bg-primary/20 disabled:opacity-40 transition-colors"
               title={!isSupabaseConfigured() ? t('connectSupabaseForGroups') : t('createGroup')}
             >
               <Users className="h-4 w-4" />
@@ -345,18 +343,18 @@ export const MessagesPage: React.FC = () => {
             </button>
           </div>
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 absolute start-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-fg-subtle absolute start-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder={t('searchConversations')}
-              className="w-full bg-slate-900 text-slate-100 text-xs rounded-full ps-9 pe-4 py-2 border border-slate-800 focus:border-violet-500 outline-none"
+              className="w-full bg-surface text-fg placeholder:text-fg-subtle text-xs rounded-full ps-9 pe-4 py-2 border border-border focus:border-primary outline-none transition-all"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-850/50">
+        <div className="flex-1 overflow-y-auto divide-y divide-border">
           {filteredConversations.map((conversation) => {
             const isSelected = activeConv?.id === conversation.id;
             return (
@@ -364,39 +362,54 @@ export const MessagesPage: React.FC = () => {
                 key={conversation.id}
                 type="button"
                 onClick={() => setActiveConv(conversation)}
-                className={`w-full text-start p-3.5 flex items-center gap-3 cursor-pointer transition-colors ${isSelected ? 'bg-violet-950/30 border-s-4 border-violet-500' : 'hover:bg-slate-900/50'}`}
+                className={`w-full text-start p-3.5 flex items-center gap-3 cursor-pointer transition-colors ${
+                  isSelected ? 'bg-primary/10 border-s-4 border-primary' : 'hover:bg-surface-hover'
+                }`}
               >
                 <Avatar src={conversation.participant.avatar} alt={conversation.groupName || conversation.participant.name} size="md" isOnline={conversation.isOnline} />
                 <span className="flex-1 min-w-0">
                   <span className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-bold text-white truncate">{conversation.groupName || conversation.participant.name}</span>
-                    <span className="text-[10px] text-slate-500">{conversation.lastMessage?.createdAt}</span>
+                    <span className="text-xs font-bold text-fg truncate"><bdi>{conversation.groupName || conversation.participant.name}</bdi></span>
+                    <span className="text-[10px] text-fg-subtle">{conversation.lastMessage?.createdAt}</span>
                   </span>
                   <span className="flex items-center justify-between gap-2 mt-0.5">
-                    <span className="text-xs text-slate-400 truncate max-w-[180px]">{conversation.isTyping ? 'Typing…' : conversation.lastMessage?.content}</span>
-                    {conversation.unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-600 text-white">{conversation.unreadCount}</span>}
+                    <span className="text-xs text-fg-muted truncate max-w-[180px]">{conversation.isTyping ? 'Typing…' : conversation.lastMessage?.content}</span>
+                    {conversation.unreadCount > 0 && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-fg">{conversation.unreadCount}</span>}
                   </span>
                 </span>
               </button>
             );
           })}
           {filteredConversations.length === 0 && (
-            <p className="px-4 py-8 text-center text-xs text-slate-500">{t('noConversationsFound')}</p>
+            <p className="px-4 py-8 text-center text-xs text-fg-subtle">{t('noConversationsFound')}</p>
           )}
         </div>
       </div>
 
+      {/* Active Conversation Thread Panel */}
       {activeConv ? (
-        <div className="flex-1 flex flex-col bg-slate-900/30 h-full min-w-0">
-          <div className="p-3.5 sm:px-6 border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md flex items-center gap-3">
-            <button type="button" onClick={() => setActiveConv(null)} className="md:hidden p-1 rounded-lg text-slate-400 hover:text-white" aria-label="Back to conversations">←</button>
+        <div className="flex-1 flex flex-col bg-surface/30 h-full min-w-0">
+          <div className="p-3.5 sm:px-6 border-b border-border bg-surface/85 backdrop-blur-md flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setActiveConv(null)}
+              className="md:hidden p-1.5 rounded-lg text-fg-muted hover:text-fg min-w-[36px] min-h-[36px] flex items-center justify-center"
+              aria-label={t('backToConversations')}
+            >
+              <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+            </button>
             <Avatar src={activeConv.participant.avatar} alt={activeConv.groupName || activeConv.participant.name} size="md" isOnline={activeConv.isOnline} />
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-bold text-white truncate">{activeConv.groupName || activeConv.participant.name}</span>
-              <span className="text-[11px] text-slate-500">{activeConv.isGroup ? t('groupConversation') : `@${activeConv.participant.username}`}</span>
+              <span className="text-sm font-bold text-fg truncate"><bdi>{activeConv.groupName || activeConv.participant.name}</bdi></span>
+              <span className="text-[11px] text-fg-subtle">{activeConv.isGroup ? t('groupConversation') : `@${activeConv.participant.username}`}</span>
             </div>
             {activeConv.isGroup && (
-              <button type="button" onClick={() => void openManageGroup()} disabled={isGroupUpdating} className="ms-auto rounded-lg border border-slate-700 px-3 py-2 text-[11px] font-semibold text-slate-200 hover:border-violet-500 disabled:opacity-50">
+              <button
+                type="button"
+                onClick={() => void openManageGroup()}
+                disabled={isGroupUpdating}
+                className="ms-auto rounded-lg border border-border px-3 py-1.5 text-[11px] font-semibold text-fg hover:border-primary disabled:opacity-50 transition-colors"
+              >
                 {t('manageGroup')}
               </button>
             )}
@@ -408,16 +421,20 @@ export const MessagesPage: React.FC = () => {
               return (
                 <div key={message.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
                   {!isMine && <Avatar src={activeConv.participant.avatar} alt={activeConv.participant.name} size="xs" />}
-                  <div className={`max-w-[82%] sm:max-w-md rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-md ${isMine ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-br-none' : 'bg-slate-800/90 text-slate-100 rounded-bl-none border border-slate-700/60'}`}>
-                    {message.content && <p className="break-words whitespace-pre-wrap">{message.content}</p>}
+                  <div className={`max-w-[82%] sm:max-w-md rounded-2xl px-4 py-2.5 text-xs sm:text-sm leading-relaxed shadow-sm ${
+                    isMine
+                      ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-ee-none'
+                      : 'bg-surface-elevated text-fg rounded-es-none border border-border'
+                  }`}>
+                    {message.content && <p className="break-words whitespace-pre-wrap" dir="auto">{message.content}</p>}
                     {!!message.attachments?.length && (
                       <div className={`grid gap-1.5 ${message.attachments.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} ${message.content ? 'mt-2' : ''}`}>
                         {message.attachments.map((attachment, index) => (
-                          <img key={`${message.id}-${index}`} src={attachment} alt="Message attachment" loading="lazy" className="max-h-64 rounded-lg object-cover" />
+                          <img key={`${message.id}-${index}`} src={attachment} alt={t('messageAttachmentAlt')} loading="lazy" className="max-h-64 rounded-lg object-cover" />
                         ))}
                       </div>
                     )}
-                    <div className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${isMine ? 'text-violet-200' : 'text-slate-400'}`}>
+                    <div className={`flex items-center justify-end gap-1 text-[10px] mt-1 ${isMine ? 'text-violet-200' : 'text-fg-subtle'}`}>
                       <span>{message.createdAt}</span>
                       {isMine && <CheckCheck className="w-3.5 h-3.5" />}
                     </div>
@@ -429,10 +446,10 @@ export const MessagesPage: React.FC = () => {
           </div>
 
           {pendingAttachments.length > 0 && (
-            <div className="px-4 pt-3 flex gap-2 flex-wrap border-t border-slate-800/60">
+            <div className="px-4 pt-3 flex gap-2 flex-wrap border-t border-border">
               {pendingAttachments.map((attachment, index) => (
-                <div key={`${attachment.slice(0, 32)}-${index}`} className="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-700">
-                  <img src={pendingAttachmentPreviews[index] || ''} alt="Pending attachment" className="h-full w-full object-cover" />
+                <div key={`${attachment.slice(0, 32)}-${index}`} className="relative h-16 w-16 overflow-hidden rounded-lg border border-border">
+                  <img src={pendingAttachmentPreviews[index] || ''} alt={t('pendingAttachmentAlt')} className="h-full w-full object-cover" />
                   <button type="button" onClick={() => {
                     const preview = pendingAttachmentPreviews[index];
                     if (preview) URL.revokeObjectURL(preview);
@@ -444,18 +461,50 @@ export const MessagesPage: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-slate-950/80 border-t border-slate-800/80 flex items-center gap-2">
+          <form onSubmit={handleSendMessage} className="p-3 sm:p-4 bg-surface border-t border-border flex items-center gap-2">
             <input ref={attachmentInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple className="hidden" onChange={(event) => void handleAttachmentUpload(event)} />
-            <button type="button" onClick={() => setInputMessage((previous) => `${previous} 😊`)} className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors" aria-label="Add emoji"><Smile className="w-5 h-5" /></button>
-            <button type="button" onClick={() => attachmentInputRef.current?.click()} disabled={isUploading || isSending || pendingAttachments.length >= 4} className="p-2 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors disabled:opacity-40" aria-label={t('attachImages')}><Image className="w-5 h-5" /></button>
-            <input type="text" value={inputMessage} onChange={(event) => setInputMessage(event.target.value)} placeholder={t('typeMessage')} maxLength={5000} disabled={isSending} className="flex-1 min-w-0 bg-slate-900 text-slate-100 placeholder-slate-500 text-xs sm:text-sm rounded-xl px-4 py-2.5 border border-slate-800 focus:border-violet-500 outline-none" />
-            <button type="submit" disabled={(!inputMessage.trim() && pendingAttachments.length === 0) || isUploading || isSending} className="p-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:from-violet-500 hover:to-blue-500 disabled:opacity-40 shadow-md shadow-violet-600/30 transition-all active:scale-95" aria-label="Send message"><Send className="w-4 h-4" /></button>
+            <button
+              type="button"
+              onClick={() => setInputMessage((previous) => `${previous} 😊`)}
+              className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+              aria-label={t('addEmoji')}
+            >
+              <Smile className="w-5 h-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => attachmentInputRef.current?.click()}
+              disabled={isUploading || isSending || pendingAttachments.length >= 4}
+              className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors disabled:opacity-40 min-w-[36px] min-h-[36px] flex items-center justify-center"
+              aria-label={t('attachImages')}
+            >
+              <Image className="w-5 h-5" />
+            </button>
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(event) => setInputMessage(event.target.value)}
+              placeholder={t('typeMessage')}
+              maxLength={5000}
+              disabled={isSending}
+              dir="auto"
+              className="flex-1 min-w-0 bg-surface-elevated text-fg placeholder:text-fg-subtle text-xs sm:text-sm rounded-xl px-4 py-2.5 border border-border focus:border-primary outline-none transition-all"
+            />
+            <button
+              type="submit"
+              disabled={(!inputMessage.trim() && pendingAttachments.length === 0) || isUploading || isSending}
+              className="p-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:from-violet-500 hover:to-blue-500 disabled:opacity-40 shadow-md shadow-violet-600/30 transition-all active:scale-95 min-w-[40px] min-h-[40px] flex items-center justify-center"
+              aria-label={t('sendMessage')}
+            >
+              <Send className="w-4 h-4 rtl:rotate-180" />
+            </button>
           </form>
         </div>
       ) : (
-        <div className="hidden md:flex flex-1 items-center justify-center p-6 text-slate-500 text-sm">{t('selectConversation')}</div>
+        <div className="hidden md:flex flex-1 items-center justify-center p-6 text-fg-subtle text-sm">{t('selectConversation')}</div>
       )}
 
+      {/* New Group Modal */}
       <Modal isOpen={showGroupModal} onClose={() => setShowGroupModal(false)} title={t('createGroup')} maxWidth="lg" footer={
         <>
           <Button variant="ghost" onClick={() => setShowGroupModal(false)}>{t('cancel')}</Button>
@@ -466,25 +515,26 @@ export const MessagesPage: React.FC = () => {
       }>
         <form onSubmit={(event) => { event.preventDefault(); void createGroup(); }} className="space-y-4">
           <label className="block space-y-1.5">
-            <span className="text-xs font-semibold text-slate-300">{t('groupName')}</span>
-            <input value={groupName} onChange={(event) => setGroupName(event.target.value)} maxLength={80} required className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500" placeholder={t('groupName')} />
+            <span className="text-xs font-semibold text-fg-muted">{t('groupName')}</span>
+            <input value={groupName} onChange={(event) => setGroupName(event.target.value)} maxLength={80} required className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-fg outline-none focus:border-primary placeholder:text-fg-subtle" placeholder={t('groupName')} />
           </label>
           <label className="block space-y-1.5">
-            <span className="text-xs font-semibold text-slate-300">{t('addPeople')}</span>
-            <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500" placeholder={t('searchPeople')} />
+            <span className="text-xs font-semibold text-fg-muted">{t('addPeople')}</span>
+            <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-fg outline-none focus:border-primary placeholder:text-fg-subtle" placeholder={t('searchPeople')} />
           </label>
-          {selectedMembers.length > 0 && <div className="flex flex-wrap gap-2">{selectedMembers.map((member) => <button type="button" key={member.id} onClick={() => setSelectedMembers((current) => current.filter((item) => item.id !== member.id))} className="inline-flex items-center gap-1 rounded-full bg-violet-600/20 px-3 py-1.5 text-xs text-violet-200">@{member.username}<X className="h-3 w-3" /></button>)}</div>}
-          <div className="max-h-52 overflow-y-auto divide-y divide-slate-800 rounded-xl border border-slate-800">
+          {selectedMembers.length > 0 && <div className="flex flex-wrap gap-2">{selectedMembers.map((member) => <button type="button" key={member.id} onClick={() => setSelectedMembers((current) => current.filter((item) => item.id !== member.id))} className="inline-flex items-center gap-1 rounded-full bg-primary/15 border border-primary/25 px-3 py-1.5 text-xs text-primary-text">@{member.username}<X className="h-3 w-3" /></button>)}</div>}
+          <div className="max-h-52 overflow-y-auto divide-y divide-border rounded-xl border border-border">
             {memberResults.map((member) => {
               const selected = selectedMembers.some((item) => item.id === member.id);
-              return <button type="button" key={member.id} onClick={() => setSelectedMembers((current) => selected ? current.filter((item) => item.id !== member.id) : [...current, member])} className="flex w-full items-center gap-3 px-3 py-2.5 text-start hover:bg-slate-800/60"><Avatar src={member.avatar} alt={member.name} size="sm" /><span className="flex-1 min-w-0"><span className="block truncate text-xs font-semibold text-white">{member.name}</span><span className="block truncate text-[11px] text-slate-400">@{member.username}</span></span><span className={`text-xs font-bold ${selected ? 'text-violet-300' : 'text-slate-500'}`}>{selected ? t('selected') : t('add')}</span></button>;
+              return <button type="button" key={member.id} onClick={() => setSelectedMembers((current) => selected ? current.filter((item) => item.id !== member.id) : [...current, member])} className="flex w-full items-center gap-3 px-3 py-2.5 text-start hover:bg-surface-hover transition-colors"><Avatar src={member.avatar} alt={member.name} size="sm" /><span className="flex-1 min-w-0"><span className="block truncate text-xs font-semibold text-fg"><bdi>{member.name}</bdi></span><span className="block truncate text-[11px] text-fg-subtle" dir="ltr">@{member.username}</span></span><span className={`text-xs font-bold ${selected ? 'text-primary-text' : 'text-fg-subtle'}`}>{selected ? t('selected') : t('add')}</span></button>;
             })}
-            {memberQuery.trim().length >= 2 && memberResults.length === 0 && <p className="px-3 py-5 text-center text-xs text-slate-500">{t('noPeopleFound')}</p>}
+            {memberQuery.trim().length >= 2 && memberResults.length === 0 && <p className="px-3 py-5 text-center text-xs text-fg-subtle">{t('noPeopleFound')}</p>}
           </div>
-          <p className="text-[11px] text-slate-500">{t('groupCreatedNotice')}</p>
+          <p className="text-[11px] text-fg-subtle">{t('groupCreatedNotice')}</p>
         </form>
       </Modal>
 
+      {/* Manage Group Modal */}
       <Modal isOpen={showManageGroupModal} onClose={() => setShowManageGroupModal(false)} title={t('manageGroup')} maxWidth="lg" footer={
         <>
           {activeConv?.ownerId !== user?.id && <Button variant="ghost" onClick={() => void handleLeaveGroup()} disabled={isGroupUpdating}>{t('leaveGroup')}</Button>}
@@ -495,33 +545,33 @@ export const MessagesPage: React.FC = () => {
           {groupMembers.some((member) => member.user.id === user?.id && member.role === 'admin') ? (
             <>
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-300">{t('renameGroup')}</label>
+                <label className="block text-xs font-semibold text-fg-muted">{t('renameGroup')}</label>
                 <div className="flex gap-2">
-                  <input value={manageGroupName} onChange={(event) => setManageGroupName(event.target.value)} maxLength={80} className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500" />
+                  <input value={manageGroupName} onChange={(event) => setManageGroupName(event.target.value)} maxLength={80} className="min-w-0 flex-1 rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-fg outline-none focus:border-primary placeholder:text-fg-subtle" />
                   <Button variant="primary" onClick={() => void handleRenameGroup()} isLoading={isGroupUpdating} disabled={!manageGroupName.trim()}>{t('saveChanges')}</Button>
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-300">{t('addPeople')}</label>
-                <input value={manageMemberQuery} onChange={(event) => setManageMemberQuery(event.target.value)} placeholder={t('searchPeople')} className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm text-white outline-none focus:border-violet-500" />
-                {manageMemberResults.length > 0 && <div className="max-h-36 overflow-y-auto rounded-xl border border-slate-800 divide-y divide-slate-800">
-                  {manageMemberResults.map((member) => <button key={member.id} type="button" disabled={isGroupUpdating} onClick={() => void handleAddGroupMember(member)} className="flex w-full items-center gap-2 px-3 py-2 text-start hover:bg-slate-800/60 disabled:opacity-50"><Avatar src={member.avatar} alt={member.name} size="xs" /><span className="flex-1 truncate text-xs text-white">{member.name} <span className="text-slate-500">@{member.username}</span></span><span className="text-xs text-violet-300">{t('add')}</span></button>)}
+                <label className="block text-xs font-semibold text-fg-muted">{t('addPeople')}</label>
+                <input value={manageMemberQuery} onChange={(event) => setManageMemberQuery(event.target.value)} placeholder={t('searchPeople')} className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-fg outline-none focus:border-primary placeholder:text-fg-subtle" />
+                {manageMemberResults.length > 0 && <div className="max-h-36 overflow-y-auto rounded-xl border border-border divide-y divide-border">
+                  {manageMemberResults.map((member) => <button key={member.id} type="button" disabled={isGroupUpdating} onClick={() => void handleAddGroupMember(member)} className="flex w-full items-center gap-2 px-3 py-2 text-start hover:bg-surface-hover disabled:opacity-50 transition-colors"><Avatar src={member.avatar} alt={member.name} size="xs" /><span className="flex-1 truncate text-xs text-fg">{member.name} <span className="text-fg-subtle">@{member.username}</span></span><span className="text-xs text-primary-text">{t('add')}</span></button>)}
                 </div>}
               </div>
             </>
-          ) : <p className="text-xs text-slate-400">{t('groupAdminOnly')}</p>}
+          ) : <p className="text-xs text-fg-subtle">{t('groupAdminOnly')}</p>}
           <div className="space-y-2">
-            <h4 className="text-xs font-semibold text-slate-300">{t('groupMembers')} ({groupMembers.length})</h4>
-            <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-800 divide-y divide-slate-800">
+            <h4 className="text-xs font-semibold text-fg-muted">{t('groupMembers')} ({groupMembers.length})</h4>
+            <div className="max-h-56 overflow-y-auto rounded-xl border border-border divide-y divide-border">
               {groupMembers.map((member) => <div key={member.user.id} className="flex items-center gap-2 px-3 py-2.5">
                 <Avatar src={member.user.avatar} alt={member.user.name} size="xs" />
-                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold text-white">{member.user.name}</span><span className="block truncate text-[11px] text-slate-500">@{member.user.username}</span></span>
-                {member.role === 'admin' && <span className="text-[10px] text-violet-300">{t('groupAdminLabel')}</span>}
-                {groupMembers.some((item) => item.user.id === user?.id && item.role === 'admin') && member.user.id !== user?.id && member.user.id !== activeConv?.ownerId && <button type="button" disabled={isGroupUpdating} onClick={() => void handleRemoveGroupMember(member.user.id)} className="rounded-lg px-2 py-1 text-[10px] text-rose-300 hover:bg-rose-500/10 disabled:opacity-50">{t('removeMember')}</button>}
+                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold text-fg"><bdi>{member.user.name}</bdi></span><span className="block truncate text-[11px] text-fg-subtle" dir="ltr">@{member.user.username}</span></span>
+                {member.role === 'admin' && <span className="text-[10px] text-primary-text">{t('groupAdminLabel')}</span>}
+                {groupMembers.some((item) => item.user.id === user?.id && item.role === 'admin') && member.user.id !== user?.id && member.user.id !== activeConv?.ownerId && <button type="button" disabled={isGroupUpdating} onClick={() => void handleRemoveGroupMember(member.user.id)} className="rounded-lg px-2 py-1 text-[10px] text-danger-text hover:bg-danger/10 disabled:opacity-50 transition-colors">{t('removeMember')}</button>}
               </div>)}
             </div>
           </div>
-          {activeConv?.ownerId === user?.id && <p className="text-[11px] text-slate-500">{t('groupOwnerCannotLeaveNotice')}</p>}
+          {activeConv?.ownerId === user?.id && <p className="text-[11px] text-fg-subtle">{t('groupOwnerCannotLeaveNotice')}</p>}
         </div>
       </Modal>
     </div>

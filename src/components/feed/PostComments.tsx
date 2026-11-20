@@ -50,9 +50,9 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
       if (onCommentCountChange) {
         onCommentCountChange(updated.length);
       }
-      showToast('Comment added!');
+      showToast(t('toastCommentAdded'));
     } catch {
-      showToast('Failed to add comment', 'error');
+      showToast(t('toastCommentFailed'), 'error');
     }
   };
 
@@ -74,14 +74,14 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
       );
       setReplyText('');
       setReplyToId(null);
-      showToast('Reply added!');
+      showToast(t('toastReplyAdded'));
     } catch {
-      showToast('Failed to add reply', 'error');
+      showToast(t('toastReplyFailed'), 'error');
     }
   };
 
   return (
-    <div className="pt-3 border-t border-slate-800/80 space-y-4">
+    <div className="pt-3 border-t border-border space-y-4">
       {/* New comment input */}
       <form onSubmit={handleAddComment} className="flex items-center gap-2.5">
         <Avatar src={user?.avatar} alt={user?.name || 'Me'} size="sm" />
@@ -92,48 +92,50 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
             maxLength={5000}
             onChange={(e) => setNewCommentText(e.target.value.slice(0, 5000))}
             placeholder={t('writeComment')}
-            className="w-full bg-slate-950/70 text-slate-100 text-xs sm:text-sm rounded-full px-4 py-2 pe-10 border border-slate-800 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+            dir="auto"
+            className="w-full bg-surface text-fg text-xs sm:text-sm rounded-full px-4 py-2 pe-10 border border-border focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition-all placeholder:text-fg-subtle"
           />
           <button
             type="submit"
             disabled={!newCommentText.trim()}
-            className="absolute end-1.5 p-1.5 rounded-full text-violet-400 hover:text-violet-300 disabled:opacity-40 disabled:hover:text-violet-400 transition-colors"
+            className="absolute end-1.5 p-1.5 rounded-full text-primary-text hover:text-primary-hover disabled:opacity-40 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
+            aria-label={t('sendComment')}
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4 rtl:rotate-180" />
           </button>
         </div>
       </form>
 
       {/* Comments list */}
       {loading ? (
-        <div className="text-xs text-slate-500 py-2">Loading discussions...</div>
+        <div className="text-xs text-fg-subtle py-2">{t('loadingComments')}</div>
       ) : comments.length === 0 ? (
-        <div className="text-xs text-slate-500 text-center py-2">No comments yet. Be the first to start the conversation!</div>
+        <div className="text-xs text-fg-subtle text-center py-2">{t('noCommentsYet')}</div>
       ) : (
         <div className="space-y-3.5 pt-1">
           {comments.map((comment) => (
             <div key={comment.id} className="space-y-2 text-start">
               <div className="flex gap-2.5 items-start">
                 <Avatar src={comment.author.avatar} alt={comment.author.name} size="sm" />
-                <div className="flex-1 bg-slate-950/50 rounded-2xl p-3 border border-slate-800/60">
+                <div className="flex-1 bg-surface-elevated/70 rounded-2xl p-3 border border-border">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-200">{comment.author.name}</span>
-                    <span className="text-[10px] text-slate-500">{comment.createdAt}</span>
+                    <span className="text-xs font-bold text-fg"><bdi>{comment.author.name}</bdi></span>
+                    <span className="text-[10px] text-fg-subtle">{comment.createdAt}</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-fg-muted mt-1 leading-relaxed" dir="auto">
                     {comment.content}
                   </p>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-4 mt-2 text-[11px] text-slate-400">
+                  <div className="flex items-center gap-4 mt-2 text-[11px] text-fg-muted">
                     <button
                       onClick={() => {
                         comment.isLiked = !comment.isLiked;
                         comment.likesCount += comment.isLiked ? 1 : -1;
                         setComments([...comments]);
                       }}
-                      className={`flex items-center gap-1 hover:text-rose-400 transition-colors ${
-                        comment.isLiked ? 'text-rose-400 font-semibold' : ''
+                      className={`flex items-center gap-1 hover:text-rose-500 transition-colors ${
+                        comment.isLiked ? 'text-rose-500 font-semibold' : ''
                       }`}
                     >
                       <Heart className={`w-3.5 h-3.5 ${comment.isLiked ? 'fill-current' : ''}`} />
@@ -142,9 +144,9 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
 
                     <button
                       onClick={() => setReplyToId(replyToId === comment.id ? null : comment.id)}
-                      className="flex items-center gap-1 hover:text-violet-400 transition-colors"
+                      className="flex items-center gap-1 hover:text-primary-text transition-colors"
                     >
-                      <Reply className="w-3.5 h-3.5" />
+                      <Reply className="w-3.5 h-3.5 rtl:-scale-x-100" />
                       <span>{t('reply')}</span>
                     </button>
                   </div>
@@ -154,14 +156,15 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
               {/* Reply form */}
               {replyToId === comment.id && (
                 <div className="ms-10 flex items-center gap-2 pt-1">
-                  <CornerDownRight className="w-3.5 h-3.5 text-slate-500" />
+                  <CornerDownRight className="w-3.5 h-3.5 text-fg-subtle rtl:rotate-180" />
                   <input
                     type="text"
                     value={replyText}
                     maxLength={5000}
                     onChange={(e) => setReplyText(e.target.value.slice(0, 5000))}
-                    placeholder={`Reply to ${comment.author.name}...`}
-                    className="flex-1 bg-slate-900 text-xs text-slate-100 rounded-full px-3 py-1.5 border border-slate-700 outline-none focus:border-violet-500"
+                    placeholder={t('replyToPlaceholder', { name: comment.author.name })}
+                    dir="auto"
+                    className="flex-1 bg-surface text-xs text-fg rounded-full px-3 py-1.5 border border-border outline-none focus:border-primary placeholder:text-fg-subtle"
                     autoFocus
                   />
                   <Button
@@ -170,23 +173,23 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
                     disabled={!replyText.trim()}
                     className="text-xs px-3 py-1"
                   >
-                    Reply
+                    {t('reply')}
                   </Button>
                 </div>
               )}
 
               {/* Threaded replies */}
               {comment.replies && comment.replies.length > 0 && (
-                <div className="ms-10 space-y-2 border-s-2 border-slate-800/80 ps-3">
+                <div className="ms-10 space-y-2 border-s-2 border-border ps-3">
                   {comment.replies.map((reply) => (
                     <div key={reply.id} className="flex gap-2 items-start">
                       <Avatar src={reply.author.avatar} alt={reply.author.name} size="xs" />
-                      <div className="flex-1 bg-slate-950/40 rounded-xl p-2.5 border border-slate-800/40">
+                      <div className="flex-1 bg-surface rounded-xl p-2.5 border border-border">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-200">{reply.author.name}</span>
-                          <span className="text-[10px] text-slate-500">{reply.createdAt}</span>
+                          <span className="text-xs font-bold text-fg"><bdi>{reply.author.name}</bdi></span>
+                          <span className="text-[10px] text-fg-subtle">{reply.createdAt}</span>
                         </div>
-                        <p className="text-xs text-slate-300 mt-0.5">{reply.content}</p>
+                        <p className="text-xs text-fg-muted mt-0.5" dir="auto">{reply.content}</p>
                       </div>
                     </div>
                   ))}

@@ -23,40 +23,42 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-vortex-dark-bg text-slate-100 flex flex-col selection:bg-violet-600 selection:text-white">
-      {/* Top Marketing Navbar matching reference image */}
-      <header className="sticky top-0 z-40 bg-slate-950/70 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-8 py-4 flex items-center justify-between">
+    <div className="min-h-[100dvh] bg-bg text-fg flex flex-col selection:bg-violet-600 selection:text-white">
+      {/* Top Marketing Navbar */}
+      <header className="sticky top-0 z-40 bg-surface/85 backdrop-blur-xl border-b border-border px-4 sm:px-8 py-3.5 flex items-center justify-between">
         <Logo size="md" showTagline />
 
         {/* Center links on desktop */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
-          <Link to="/feed" className="hover:text-white transition-colors">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-fg-muted">
+          <Link to="/feed" className="hover:text-fg transition-colors">
             {t('home')}
           </Link>
-          <Link to="/explore" className="hover:text-white transition-colors">
+          <Link to="/explore" className="hover:text-fg transition-colors">
             {t('explore')}
           </Link>
-          <Link to="/communities" className="hover:text-white transition-colors">
+          <Link to="/communities" className="hover:text-fg transition-colors">
             {t('communities')}
           </Link>
         </nav>
 
         {/* Right action buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+            aria-label={t('toggleLanguage')}
           >
-            <Globe className="w-4 h-4 text-violet-400" />
+            <Globe className="w-4 h-4 text-primary" />
             <span>{language === 'en' ? 'العربية' : 'English'}</span>
           </button>
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            title="Toggle Theme"
+            className="p-2 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors"
+            title={t('toggleTheme')}
+            aria-label={t('toggleTheme')}
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
           </button>
 
           {user ? (
@@ -64,9 +66,9 @@ export const LandingPage: React.FC = () => {
               onClick={() => navigate('/feed')}
               variant="primary"
               size="sm"
-              rightIcon={<ArrowRight className="w-4 h-4" />}
+              rightIcon={<ArrowRight className="w-4 h-4 rtl:rotate-180" />}
             >
-              Open App
+              {t('openApp')}
             </Button>
           ) : (
             <div className="flex items-center gap-2">
@@ -85,28 +87,28 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero Section matching reference image */}
-      <section className="relative pt-12 pb-24 md:pt-20 md:pb-32 px-4 sm:px-8 max-w-7xl mx-auto w-full flex flex-col items-center text-center overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 px-4 sm:px-8 max-w-7xl mx-auto w-full flex flex-col items-center text-center overflow-hidden">
         {/* Subtle Ambient Violet/Blue Backlight glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-violet-600/20 to-blue-600/20 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/4 start-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[320px] bg-gradient-to-tr from-violet-600/15 to-blue-600/15 blur-[120px] rounded-full pointer-events-none" />
 
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-violet-500/30 text-xs font-semibold text-violet-300 shadow-vortex-glow mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-elevated border border-primary/30 text-xs font-semibold text-primary-text shadow-sm mb-6">
           <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Modern Social Networking Platform</span>
+          <span>{t('landingBadge')}</span>
         </div>
 
         {/* Hero Title */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white max-w-4xl leading-[1.1]">
-          Connect. <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-blue-400">Share</span>, Discover.
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-fg max-w-4xl leading-[1.1]">
+          {t('landingTitleConnect')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600 dark:from-violet-400 dark:to-blue-400">{t('landingTitleShare')}</span>{language === 'ar' ? '،' : ','} {t('landingTitleDiscover')}
         </h1>
 
         {/* Hero Subtitle */}
-        <p className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed font-normal">
+        <p className="mt-6 text-base sm:text-xl text-fg-muted max-w-2xl leading-relaxed font-normal">
           {t('landingHeroSubtitle')}
         </p>
 
-        {/* Hero CTAs matching reference image */}
+        {/* Hero CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link to="/feed">
             <Button variant="primary" size="lg" className="px-8 shadow-vortex-glow">
@@ -120,40 +122,40 @@ export const LandingPage: React.FC = () => {
           </a>
         </div>
 
-        {/* Social Proof avatars row matching reference image */}
+        {/* Social Proof avatars */}
         <div className="mt-8 flex items-center gap-3">
-          <div className="flex -space-x-2">
+          <div className="flex [&>*+*]:-ms-2">
             <img
-              className="w-8 h-8 rounded-full border-2 border-slate-900 object-cover"
+              className="w-8 h-8 rounded-full border-2 border-surface object-cover"
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"
               alt="User 1"
             />
             <img
-              className="w-8 h-8 rounded-full border-2 border-slate-900 object-cover"
+              className="w-8 h-8 rounded-full border-2 border-surface object-cover"
               src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
               alt="User 2"
             />
             <img
-              className="w-8 h-8 rounded-full border-2 border-slate-900 object-cover"
+              className="w-8 h-8 rounded-full border-2 border-surface object-cover"
               src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
               alt="User 3"
             />
             <img
-              className="w-8 h-8 rounded-full border-2 border-slate-900 object-cover"
+              className="w-8 h-8 rounded-full border-2 border-surface object-cover"
               src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80"
               alt="User 4"
             />
           </div>
-          <span className="text-xs sm:text-sm font-semibold text-slate-400">
+          <span className="text-xs sm:text-sm font-semibold text-fg-muted">
             {t('activeUsersCount')}
           </span>
         </div>
 
-        {/* Fan of Tilted Preview Cards matching the reference image */}
+        {/* Fan of Tilted Preview Cards */}
         <div className="mt-14 relative w-full max-w-4xl flex items-center justify-center pt-8">
-          <div className="relative flex items-center justify-center -space-x-8 sm:-space-x-12">
+          <div className="relative flex items-center justify-center [&>*+*]:-ms-8 sm:[&>*+*]:-ms-12">
             {/* Left Card: Portrait */}
-            <div className="w-40 sm:w-56 h-60 sm:h-80 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/80 transform -rotate-12 hover:-rotate-6 transition-all duration-300 z-10 bg-slate-900">
+            <div className="w-40 sm:w-56 h-60 sm:h-80 rounded-2xl overflow-hidden shadow-card border border-border transform -rotate-12 hover:-rotate-6 transition-all duration-300 z-10 bg-surface">
               <img
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
                 alt="Portrait preview"
@@ -161,21 +163,21 @@ export const LandingPage: React.FC = () => {
               />
             </div>
 
-            {/* Center Card: High-rise City Skyline Sunset */}
-            <div className="w-52 sm:w-72 h-72 sm:h-96 rounded-2xl overflow-hidden shadow-2xl border-2 border-violet-500/60 transform z-20 hover:scale-105 transition-all duration-300 bg-slate-900 shadow-vortex-glow">
+            {/* Center Card: High-rise City Skyline */}
+            <div className="w-52 sm:w-72 h-72 sm:h-96 rounded-2xl overflow-hidden shadow-2xl border-2 border-violet-500/60 transform z-20 hover:scale-105 transition-all duration-300 bg-surface">
               <img
                 src="https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=800&q=80"
                 alt="Cityscape preview"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-3 inset-x-3 p-3 bg-slate-950/80 backdrop-blur-md rounded-xl text-start">
-                <span className="text-xs font-bold text-white block">Ahmed Mohamed</span>
-                <span className="text-[11px] text-violet-300">أحب هذا المكان فعلا! ❤️</span>
+              <div className="absolute bottom-3 inset-x-3 p-3 bg-surface/90 backdrop-blur-md rounded-xl text-start border border-border/50">
+                <span className="text-xs font-bold text-fg block"><bdi>Ahmed Mohamed</bdi></span>
+                <span className="text-[11px] text-primary-text" dir="auto">أحب هذا المكان فعلا! ❤️</span>
               </div>
             </div>
 
-            {/* Right Card: Scenic Mountains / Skyline */}
-            <div className="w-40 sm:w-56 h-60 sm:h-80 rounded-2xl overflow-hidden shadow-2xl border border-slate-700/80 transform rotate-12 hover:rotate-6 transition-all duration-300 z-10 bg-slate-900">
+            {/* Right Card: Scenic Nature */}
+            <div className="w-40 sm:w-56 h-60 sm:h-80 rounded-2xl overflow-hidden shadow-card border border-border transform rotate-12 hover:rotate-6 transition-all duration-300 z-10 bg-surface">
               <img
                 src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
                 alt="Nature preview"
@@ -187,65 +189,65 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Feature Highlights Grid */}
-      <section id="features" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto w-full border-t border-slate-800/80">
+      <section id="features" className="py-20 px-4 sm:px-8 max-w-7xl mx-auto w-full border-t border-border">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-violet-400">Engineered for Excellence</span>
-          <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-primary-text">Engineered for Excellence</span>
+          <h2 className="text-3xl sm:text-4xl font-black text-fg mt-2">
             A New Standard for Social Platforms
           </h2>
-          <p className="text-sm sm:text-base text-slate-400 mt-3">
+          <p className="text-sm sm:text-base text-fg-muted mt-3">
             Designed from the ground up for speed, visual clarity, and authentic human interaction.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Feature 1 */}
-          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-violet-500/40 transition-all text-start flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-surface border border-border hover:border-primary/40 shadow-card transition-all text-start flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-violet-600/15 border border-violet-500/20 text-violet-400 flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-xl bg-violet-600/15 border border-violet-500/20 text-primary flex items-center justify-center mb-5">
                 <Zap className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">{t('feature1Title')}</h3>
-              <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+              <h3 className="text-lg font-bold text-fg">{t('feature1Title')}</h3>
+              <p className="text-xs sm:text-sm text-fg-muted mt-2 leading-relaxed">
                 {t('feature1Desc')}
               </p>
             </div>
           </div>
 
           {/* Feature 2 */}
-          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-violet-500/40 transition-all text-start flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-surface border border-border hover:border-primary/40 shadow-card transition-all text-start flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-xl bg-blue-600/15 border border-blue-500/20 text-blue-500 flex items-center justify-center mb-5">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">{t('feature2Title')}</h3>
-              <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+              <h3 className="text-lg font-bold text-fg">{t('feature2Title')}</h3>
+              <p className="text-xs sm:text-sm text-fg-muted mt-2 leading-relaxed">
                 {t('feature2Desc')}
               </p>
             </div>
           </div>
 
           {/* Feature 3 */}
-          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-violet-500/40 transition-all text-start flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-surface border border-border hover:border-primary/40 shadow-card transition-all text-start flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-indigo-600/15 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-xl bg-indigo-600/15 border border-indigo-500/20 text-indigo-500 flex items-center justify-center mb-5">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">{t('feature3Title')}</h3>
-              <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+              <h3 className="text-lg font-bold text-fg">{t('feature3Title')}</h3>
+              <p className="text-xs sm:text-sm text-fg-muted mt-2 leading-relaxed">
                 {t('feature3Desc')}
               </p>
             </div>
           </div>
 
           {/* Feature 4 */}
-          <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800/80 hover:border-violet-500/40 transition-all text-start flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-surface border border-border hover:border-primary/40 shadow-card transition-all text-start flex flex-col justify-between">
             <div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-600/15 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-5">
+              <div className="w-12 h-12 rounded-xl bg-emerald-600/15 border border-emerald-500/20 text-emerald-500 flex items-center justify-center mb-5">
                 <Globe className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-white">{t('feature4Title')}</h3>
-              <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
+              <h3 className="text-lg font-bold text-fg">{t('feature4Title')}</h3>
+              <p className="text-xs sm:text-sm text-fg-muted mt-2 leading-relaxed">
                 {t('feature4Desc')}
               </p>
             </div>
@@ -255,11 +257,11 @@ export const LandingPage: React.FC = () => {
 
       {/* Interactive CTA Banner */}
       <section className="py-16 px-4 sm:px-8 max-w-5xl mx-auto w-full text-center">
-        <div className="p-8 sm:p-14 rounded-3xl bg-gradient-to-r from-violet-950/70 via-slate-900 to-blue-950/70 border border-violet-500/30 shadow-2xl relative overflow-hidden">
-          <h2 className="text-2xl sm:text-4xl font-black text-white">
+        <div className="p-8 sm:p-14 rounded-3xl bg-gradient-to-r from-violet-600/10 via-surface to-blue-600/10 border border-primary/30 shadow-card relative overflow-hidden">
+          <h2 className="text-2xl sm:text-4xl font-black text-fg">
             {t('readyToJoin')}
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+          <p className="mt-3 text-sm sm:text-base text-fg-muted max-w-xl mx-auto">
             Experience the difference of a thoughtfully designed social space.
           </p>
           <div className="mt-8 flex justify-center">
@@ -273,13 +275,21 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-800/80 py-8 px-4 sm:px-8 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <Logo size="sm" />
+      <footer className="mt-auto border-t border-border py-8 px-4 sm:px-8 max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-fg-subtle">
+        <div className="flex flex-col items-center sm:items-start gap-2">
+          <Logo size="sm" />
+          <div className="flex items-center gap-2" title="AUREX — VORTEX creator brand">
+            <img src="/aurex-logo.png" alt="AUREX" className="h-7 w-auto max-w-[112px] object-contain" />
+            <span className="text-[11px] font-medium text-fg-muted">
+              {language === 'ar' ? 'تطوير AUREX' : 'Created by AUREX'}
+            </span>
+          </div>
+        </div>
         <div className="flex items-center gap-6">
-          <Link to="/feed" className="hover:text-slate-300">Feed</Link>
-          <Link to="/explore" className="hover:text-slate-300">Explore</Link>
-          <Link to="/communities" className="hover:text-slate-300">Communities</Link>
-          <Link to="/admin" className="hover:text-slate-300">Admin</Link>
+          <Link to="/feed" className="hover:text-fg transition-colors">{t('home')}</Link>
+          <Link to="/explore" className="hover:text-fg transition-colors">{t('explore')}</Link>
+          <Link to="/communities" className="hover:text-fg transition-colors">{t('communities')}</Link>
+          <Link to="/admin" className="hover:text-fg transition-colors">{t('admin')}</Link>
         </div>
         <span>{t('footerRights')}</span>
       </footer>

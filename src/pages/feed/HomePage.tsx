@@ -71,23 +71,23 @@ export const HomePage: React.FC = () => {
   };
 
   const feedTabs = [
-    { id: 'forYou', label: t('forYou'), icon: <Sparkles className="w-4 h-4 text-violet-400" /> },
-    { id: 'following', label: t('following'), icon: <Users className="w-4 h-4 text-blue-400" /> },
-    { id: 'latest', label: t('latest'), icon: <Clock className="w-4 h-4 text-emerald-400" /> },
+    { id: 'forYou', label: t('forYou'), icon: <Sparkles className="w-4 h-4 text-primary" /> },
+    { id: 'following', label: t('following'), icon: <Users className="w-4 h-4 text-blue-500" /> },
+    { id: 'latest', label: t('latest'), icon: <Clock className="w-4 h-4 text-emerald-500" /> },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-[100dvh]">
       {/* Sticky Feed Header with Tabs */}
-      <div className="sticky top-0 md:top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
+      <div className="sticky top-0 z-20 bg-surface/85 backdrop-blur-md border-b border-border">
         <div className="px-4 pt-3 flex items-center justify-between">
-          <h1 className="text-lg font-black text-white tracking-tight">{t('home')}</h1>
+          <h1 className="text-lg font-black text-fg tracking-tight">{t('home')}</h1>
           <div className="flex items-center gap-2">
             {hasNewPosts && (
               <button
                 type="button"
                 onClick={fetchPosts}
-                className="rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-200 hover:bg-violet-500/20"
+                className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary-text hover:bg-primary/20 transition-colors"
               >
                 {t('newPostsAvailable')}
               </button>
@@ -95,9 +95,9 @@ export const HomePage: React.FC = () => {
             <button
               type="button"
               onClick={fetchPosts}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              title="Refresh feed"
-              aria-label="Refresh feed"
+              className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+              title={t('refreshFeed')}
+              aria-label={t('refreshFeed')}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -118,14 +118,14 @@ export const HomePage: React.FC = () => {
 
       {/* Main Feed Container */}
       <div className="p-4 sm:p-6 space-y-5">
-        {/* Post Composer matching reference image */}
+        {/* Post Composer */}
         <CreatePostCard onPostCreated={handlePostCreated} />
 
         {/* Posts stream */}
         {loading ? (
           <div className="space-y-4 pt-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+              <div key={i} className="p-5 rounded-2xl bg-surface border border-border space-y-3 shadow-card">
                 <div className="flex items-center gap-3">
                   <Skeleton className="w-10 h-10 rounded-full" />
                   <div className="space-y-1.5 flex-1">
