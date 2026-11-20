@@ -147,7 +147,7 @@ export class SupabaseNotificationService implements INotificationService {
     if (error) throw new Error(`Failed to load unread notification count: ${error.message}`);
     return count || 0;
   }
-  subscribeToNotifications(onChange: () => void): () => void {
+  subscribeToNotifications(onChange: (type?: NotificationItem['type']) => void): () => void {
     if (!isSupabaseConfigured()) return this.fallbackMock.subscribeToNotifications(onChange);
 
     let active = true;
