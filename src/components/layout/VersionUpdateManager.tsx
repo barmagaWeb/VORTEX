@@ -17,13 +17,31 @@ const hasActiveEditor = (): boolean => {
   return active instanceof HTMLElement && active.isContentEditable;
 };
 
+const hasUnsavedFormChanges = (): boolean => {
+  const fields = Array.from(document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
+    'input:not([type="search"]), textarea, select'
+  ));
+
+  return fields.some((field) => {
+    if (field.disabled) return false;
+    if (field instanceof HTMLInputElement) {
+      if (['button', 'submit', 'reset', 'hidden', 'search'].includes(field.type)) return false;
+      if (field.type === 'checkbox' || field.type === 'radio') return field.checked !== field.defaultChecked;
+      if (field.type === 'file') return Boolean(field.files?.length);
+      return field.value !== field.defaultValue;
+    }
+    if (field instanceof HTMLTextAreaElement) return field.value !== field.defaultValue;
+    return Array.from(field.options).some((option) => option.selected !== option.defaultSelected);
+  });
+};
+
 export const VersionUpdateManager: React.FC = () => {
   const [waitingForSafeUpdate, setWaitingForSafeUpdate] = useState(false);
   const targetVersion = useRef<string | null>(null);
 
   const reloadWhenSafe = useCallback(() => {
     if (!targetVersion.current) return;
-    if (hasActiveEditor()) {
+    if (hasActiveEditor() || hasUnsavedFormChanges()) {
       setWaitingForSafeUpdate(true);
       return;
     }
@@ -36,6 +54,10 @@ export const VersionUpdateManager: React.FC = () => {
 
     const checkForUpdate = async () => {
       if (!active || checking || document.visibilityState === 'hidden') return;
+      if (targetVersion.current) {
+        reloadWhenSafe();
+        return;
+      }
       checking = true;
       try {
         const response = await fetch(`${VERSION_URL}?_=${Date.now()}`, {
@@ -71,9 +93,7 @@ export const VersionUpdateManager: React.FC = () => {
 
     const onFocusOut = () => {
       window.setTimeout(() => {
-        if (active && targetVersion.current && !hasActiveEditor()) {
-          window.location.reload();
-        }
+        if (active && targetVersion.current) reloadWhenSafe();
       }, 150);
     };
 
@@ -84,12 +104,18 @@ export const VersionUpdateManager: React.FC = () => {
     void checkForUpdate();
     const interval = window.setInterval(() => void checkForUpdate(), CHECK_INTERVAL_MS);
     document.addEventListener('focusout', onFocusOut);
+    document.addEventListener('input', onFocusOut, true);
+    document.addEventListener('change', onFocusOut, true);
+    document.addEventListener('reset', onFocusOut, true);
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       active = false;
       window.clearInterval(interval);
       document.removeEventListener('focusout', onFocusOut);
+      document.removeEventListener('input', onFocusOut, true);
+      document.removeEventListener('change', onFocusOut, true);
+      document.removeEventListener('reset', onFocusOut, true);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [reloadWhenSafe]);
@@ -103,8 +129,8 @@ export const VersionUpdateManager: React.FC = () => {
       className="fixed bottom-20 md:bottom-5 inset-x-3 md:inset-x-auto md:end-5 z-[100] mx-auto md:mx-0 max-w-md rounded-xl border border-primary/30 bg-surface-elevated/95 px-4 py-3 text-sm text-fg shadow-2xl backdrop-blur-xl"
     >
       {document.documentElement.dir === 'rtl'
-        ? 'تم تجهيز تحديث جديد. احفظ ما تكتبه، وبمجرد الخروج من حقل الكتابة سيتم تحديث الموقع تلقائيًا.'
-        : 'A new update is ready. Finish your current typing; the site will update automatically when you leave the field.'}
+        ? 'تم تجهيز تحديث جديد. احفظ أي تغييرات غير مُرسلة؛ سيتم تحديث الموقع تلقائيًا بعد انتهاء التعديل.'
+        : 'A new update is ready. Save any unsent changes; the site will update automatically when editing is finished.'}
     </div>
   );
 };
