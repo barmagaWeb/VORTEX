@@ -8,7 +8,10 @@ const DEFAULT_AVATAR =
 
 const getAppRedirectUrl = (path: string): string => {
   const configuredBase = String(import.meta.env.VITE_APP_URL || '').trim();
-  const base = configuredBase || window.location.origin;
+  const fallbackBase = import.meta.env.DEV
+    ? 'https://vortex-4fl.pages.dev'
+    : window.location.origin;
+  const base = configuredBase || fallbackBase;
   return new URL(path, base.endsWith('/') ? base : `${base}/`).toString();
 };
 
