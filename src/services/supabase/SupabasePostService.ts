@@ -351,19 +351,16 @@ export class SupabasePostService implements IPostService {
 
     const { data, error } = await supabase
       .from('comments')
-      .select(`
-        *,
-        profiles!comments_author_id_fkey(*)
-      `)
+      .select('*, profiles!comments_author_id_fkey(*)')
       .eq('post_id', postId)
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
+      .order('created_at', { ascending: true })
+      .order('id', { ascending: true })
       .limit(100);
 
     if (error) throw new Error(`Unable to load comments: ${error.message}`);
     if (!data) return [];
 
-    return [...data].reverse().map((c) => ({
+    const mapped: Comment[] = data.map((c) => ({
       id: c.id,
       postId: c.post_id,
       author: {
@@ -381,7 +378,23 @@ export class SupabasePostService implements IPostService {
       content: c.content,
       createdAt: new Date(c.created_at).toLocaleString(),
       likesCount: c.likes_count || 0,
+      replies: [],
     }));
+
+    const byId = new Map(mapped.map((comment) => [comment.id, comment]));
+    const topLevel: Comment[] = [];
+    data.forEach((row, index) => {
+      const comment = mapped[index];
+      const parentId = row.parent_comment_id as string | null;
+      const parent = parentId ? byId.get(parentId) : undefined;
+      if (parent) {
+        parent.replies = [...(parent.replies || []), comment];
+      } else {
+        topLevel.push(comment);
+      }
+    });
+
+    return topLevel;
   }
 
   async addComment(postId: string, content: string, parentCommentId?: string): Promise<Comment> {
