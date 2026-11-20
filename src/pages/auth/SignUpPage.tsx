@@ -10,7 +10,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 
 export const SignUpPage: React.FC = () => {
-  const { register } = useAuth();
+  const { register, setPendingVerificationEmail } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const { showToast } = useToast();
@@ -47,6 +47,11 @@ export const SignUpPage: React.FC = () => {
       navigate(newUser.emailVerified === false ? '/auth/verify' : '/feed');
     } catch (signupError) {
       const message = signupError instanceof Error ? signupError.message : '';
+      if (message.includes('An account with this email already exists')) {
+        setPendingVerificationEmail(email.trim().toLowerCase());
+        navigate('/auth/verify');
+        return;
+      }
       setError(message || t('errCreateAccountFailed'));
     } finally {
       setIsLoading(false);
