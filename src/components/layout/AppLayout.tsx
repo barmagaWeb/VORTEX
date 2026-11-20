@@ -16,11 +16,12 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, wideContent = false }) => {
   const [createPostOpen, setCreatePostOpen] = useState(false);
   const { user } = useAuth();
+  const userId = user?.id;
   const [unreadNotifsCount, setUnreadNotifsCount] = useState(0);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   const refreshUnreadCounts = useCallback(async () => {
-    if (!user) {
+    if (!userId) {
       setUnreadNotifsCount(0);
       setUnreadMessagesCount(0);
       return;
@@ -35,7 +36,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
     } catch (error) {
       console.error('Unable to refresh VORTEX unread counters', error);
     }
-  }, [user?.id]);
+  }, [userId]);
 
   useEffect(() => {
     void refreshUnreadCounts();
@@ -52,7 +53,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
         .catch((error: unknown) => console.error('Unable to refresh message count', error));
     };
     const unsubscribeInbox = messagingService.subscribeToInboxMessages((message) => {
-      if (message.senderId !== user?.id) refreshMessageCount();
+      if (message.senderId !== userId) refreshMessageCount();
     });
     window.addEventListener('vortex:messages_read', refreshMessageCount);
     return () => {
@@ -60,7 +61,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
       unsubscribeInbox();
       window.removeEventListener('vortex:messages_read', refreshMessageCount);
     };
-  }, [refreshUnreadCounts, user?.id]);
+  }, [refreshUnreadCounts, userId]);
 
   return (
     <div className="min-h-[100dvh] bg-bg text-fg flex flex-col antialiased">
