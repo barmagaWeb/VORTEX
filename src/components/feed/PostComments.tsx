@@ -146,7 +146,7 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
           />
           <button
             type="submit"
-            disabled={!newCommentText.trim() || commentSubmitting || !user}
+            disabled={!newCommentText.trim() || commentSubmitting || loading || !user}
             className="absolute end-1.5 p-1.5 rounded-full text-primary-text hover:text-primary-hover disabled:opacity-40 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
             aria-label={t('sendComment')}
           >
