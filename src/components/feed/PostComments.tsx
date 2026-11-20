@@ -34,7 +34,12 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
     const fetchComments = async () => {
       try {
         const data = await postService.getComments(postId);
-        if (active) setComments(data);
+        if (active) {
+          setComments((current) => [
+            ...data,
+            ...current.filter((comment) => comment.id.startsWith('pending-')),
+          ]);
+        }
       } catch {
         // ignore
       } finally {
