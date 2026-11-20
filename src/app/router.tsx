@@ -175,7 +175,7 @@ export const router = createBrowserRouter([
   {
     element: (
       <ProtectedRoute>
-        <AppLayout showRightSidebar={false} />
+        <AppLayout showRightSidebar={false} wideContent />
       </ProtectedRoute>
     ),
     children: [
