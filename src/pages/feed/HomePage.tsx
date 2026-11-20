@@ -14,7 +14,7 @@ import { useToast } from '../../context/ToastContext';
 export const HomePage: React.FC = () => {
   const { t } = useLanguage();
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'forYou' | 'following' | 'latest'>('forYou');
+  const [activeTab, setActiveTab] = useState<'forYou' | 'following' | 'latest'>('latest');
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasNewPosts, setHasNewPosts] = useState(false);
@@ -65,7 +65,7 @@ export const HomePage: React.FC = () => {
   }, [fetchPosts]);
 
   const handlePostCreated = (newPost: Post) => {
-    setPosts((prev) => [newPost, ...prev]);
+    setPosts((prev) => [newPost, ...prev.filter((post) => post.id !== newPost.id)]);
   };
 
   const handlePostUpdated = (updated: Post) => {
