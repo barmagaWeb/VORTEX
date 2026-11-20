@@ -165,17 +165,33 @@ export const MessagesPage: React.FC = () => {
     const text = inputMessage.trim();
     const attachments = [...pendingAttachments];
     const previews = [...pendingAttachmentPreviews];
+    const temporaryId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimisticMessage: Message = {
+      id: temporaryId,
+      senderId: user?.id || '',
+      conversationId: activeConv.id,
+      content: text,
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isRead: true,
+      attachments: previews,
+    };
+
     setInputMessage('');
     setPendingAttachments([]);
     setPendingAttachmentPreviews([]);
+    setMessages((current) => [...current, optimisticMessage]);
     setIsSending(true);
 
     try {
       const sent = await messagingService.sendMessage(activeConv.id, text, attachments);
-      setMessages((current) => current.some((item) => item.id === sent.id) ? current : [...current, sent]);
+      setMessages((current) => {
+        const withoutTemporary = current.filter((item) => item.id !== temporaryId);
+        return withoutTemporary.some((item) => item.id === sent.id) ? withoutTemporary : [...withoutTemporary, sent];
+      });
       previews.forEach((preview) => URL.revokeObjectURL(preview));
       void refreshConversations().catch((error: unknown) => console.error('Unable to refresh conversation list', error));
     } catch {
+      setMessages((current) => current.filter((item) => item.id !== temporaryId));
       setInputMessage(text);
       setPendingAttachments(attachments);
       setPendingAttachmentPreviews(previews);
