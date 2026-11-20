@@ -30,6 +30,15 @@ export const VerifyEmailPage: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setTimeout(() => {
+      setResendCooldown((remaining) => Math.max(0, remaining - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (pendingEmail) setEmail(pendingEmail);
@@ -38,21 +47,40 @@ export const VerifyEmailPage: React.FC = () => {
 
   const handleResend = async (event: React.FormEvent) => {
     event.preventDefault();
-    const normalizedEmail = email.trim();
+    const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
       setError(t('verificationEmailRequired'));
       return;
     }
+    if (resendCooldown > 0) {
+      setError(language === 'ar'
+        ? `انتظر ${resendCooldown} ثانية قبل طلب رمز جديد.`
+        : `Please wait ${resendCooldown} seconds before requesting another code.`);
+      return;
+    }
 
     setError('');
+    setSent(false);
     setIsSending(true);
     try {
       await resendVerificationEmail(normalizedEmail);
       setPendingVerificationEmail(normalizedEmail);
+      setResendCooldown(32);
       setSent(true);
-      showToast(t('verificationEmailSent'));
+      showToast(language === 'ar'
+        ? 'تم قبول طلب إرسال رمز التحقق. افحص الوارد والرسائل غير المرغوب فيها.'
+        : 'Your verification request was accepted. Check your inbox and spam folder.');
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : t('verificationSendFailed'));
+      const message = requestError instanceof Error ? requestError.message : t('verificationSendFailed');
+      const waitMatch = message.match(/after\\s+(\\d+)\\s+seconds?/i);
+      if (waitMatch || /over_email_send_rate_limit|email rate limit exceeded/i.test(message)) {
+        setResendCooldown(Math.max(32, Number(waitMatch?.[1] || 0) + 1));
+        setError(language === 'ar'
+          ? 'إعادة الإرسال محدودة مؤقتاً. انتظر انتهاء العداد ثم حاول مرة واحدة.'
+          : 'Resending is temporarily rate-limited. Wait for the countdown, then try once.');
+      } else {
+        setError(message);
+      }
     } finally {
       setIsSending(false);
     }
@@ -136,7 +164,9 @@ export const VerifyEmailPage: React.FC = () => {
           {sent && (
             <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-600 dark:text-emerald-300">
               <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-              <span>{t('verificationEmailSent')}</span>
+              <span>{language === 'ar'
+                ? 'تم قبول طلب الإرسال. افحص الوارد والرسائل غير المرغوب فيها؛ وقد يتأخر وصول الرسالة قليلاً.'
+                : 'The email request was accepted. Check your inbox and spam folder; delivery may take a few minutes.'}</span>
             </div>
           )}
 
@@ -174,9 +204,11 @@ export const VerifyEmailPage: React.FC = () => {
               required
             />
             {error && <p role="alert" className="text-xs font-semibold text-danger-text">{error}</p>}
-            <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isSending} className="shadow-vortex-glow">
+            <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isSending} disabled={resendCooldown > 0} className="shadow-vortex-glow">
               <RefreshCw className="me-2 h-4 w-4" />
-              {t('resendVerificationEmail')}
+              {resendCooldown > 0
+                ? (language === 'ar' ? `إعادة الإرسال بعد ${resendCooldown} ثانية` : `Resend in ${resendCooldown}s`)
+                : t('resendVerificationEmail')}
             </Button>
           </form>
 
