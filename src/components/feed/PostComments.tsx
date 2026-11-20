@@ -23,63 +23,104 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
   const [replyToId, setReplyToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [replySubmitting, setReplySubmitting] = useState(false);
 
   const getUsernameLabel = (username: string, fallback: string) =>
     username ? `@${username.replace(/^@/, '')}` : fallback;
 
   useEffect(() => {
+    let active = true;
     const fetchComments = async () => {
       try {
         const data = await postService.getComments(postId);
-        setComments(data);
+        if (active) setComments(data);
       } catch {
         // ignore
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
-    fetchComments();
+    void fetchComments();
+    return () => { active = false; };
   }, [postId]);
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return;
+    const content = newCommentText.trim();
+    if (!content || !user || commentSubmitting) return;
+
+    const temporaryId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimisticComment: Comment = {
+      id: temporaryId,
+      postId,
+      author: user,
+      content,
+      createdAt: new Date().toLocaleString(),
+      likesCount: 0,
+      replies: [],
+    };
+
+    setComments((prev) => [...prev, optimisticComment]);
+    setNewCommentText('');
+    setCommentSubmitting(true);
+    onCommentCountChange?.(comments.length + 1);
 
     try {
-      const added = await postService.addComment(postId, newCommentText.trim());
-      const updated = [...comments, added];
-      setComments(updated);
-      setNewCommentText('');
-      if (onCommentCountChange) {
-        onCommentCountChange(updated.length);
-      }
+      const added = await postService.addComment(postId, content);
+      setComments((prev) => prev.map((comment) => comment.id === temporaryId ? added : comment));
       showToast(t('toastCommentAdded'));
     } catch {
+      setComments((prev) => prev.filter((comment) => comment.id !== temporaryId));
+      onCommentCountChange?.(Math.max(0, comments.length));
+      setNewCommentText(content);
       showToast(t('toastCommentFailed'), 'error');
+    } finally {
+      setCommentSubmitting(false);
     }
   };
 
   const handleAddReply = async (parentCommentId: string) => {
-    if (!replyText.trim()) return;
+    const content = replyText.trim();
+    if (!content || !user || replySubmitting) return;
+
+    const temporaryId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const optimisticReply: Comment = {
+      id: temporaryId,
+      postId,
+      author: user,
+      content,
+      createdAt: new Date().toLocaleString(),
+      likesCount: 0,
+    };
+
+    setComments((prev) => prev.map((comment) =>
+      comment.id === parentCommentId
+        ? { ...comment, replies: [...(comment.replies || []), optimisticReply] }
+        : comment
+    ));
+    setReplyText('');
+    setReplySubmitting(true);
 
     try {
-      const addedReply = await postService.addComment(postId, replyText.trim(), parentCommentId);
-      setComments((prev) =>
-        prev.map((c) => {
-          if (c.id === parentCommentId) {
-            return {
-              ...c,
-              replies: [...(c.replies || []), addedReply],
-            };
-          }
-          return c;
-        })
-      );
-      setReplyText('');
+      const addedReply = await postService.addComment(postId, content, parentCommentId);
+      setComments((prev) => prev.map((comment) =>
+        comment.id === parentCommentId
+          ? { ...comment, replies: (comment.replies || []).map((reply) => reply.id === temporaryId ? addedReply : reply) }
+          : comment
+      ));
       setReplyToId(null);
       showToast(t('toastReplyAdded'));
     } catch {
+      setComments((prev) => prev.map((comment) =>
+        comment.id === parentCommentId
+          ? { ...comment, replies: (comment.replies || []).filter((reply) => reply.id !== temporaryId) }
+          : comment
+      ));
+      setReplyText(content);
       showToast(t('toastReplyFailed'), 'error');
+    } finally {
+      setReplySubmitting(false);
     }
   };
 
@@ -100,7 +141,7 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
           />
           <button
             type="submit"
-            disabled={!newCommentText.trim()}
+            disabled={!newCommentText.trim() || commentSubmitting || !user}
             className="absolute end-1.5 p-1.5 rounded-full text-primary-text hover:text-primary-hover disabled:opacity-40 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
             aria-label={t('sendComment')}
           >
@@ -172,8 +213,8 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
                   />
                   <Button
                     size="sm"
-                    onClick={() => handleAddReply(comment.id)}
-                    disabled={!replyText.trim()}
+                    onClick={() => void handleAddReply(comment.id)}
+                    disabled={!replyText.trim() || replySubmitting || !user}
                     className="text-xs px-3 py-1"
                   >
                     {t('reply')}
