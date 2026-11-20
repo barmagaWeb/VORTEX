@@ -101,7 +101,7 @@ export const VersionUpdateManager: React.FC = () => {
       aria-live="polite"
       className="fixed bottom-20 md:bottom-5 inset-x-3 md:inset-x-auto md:end-5 z-[100] mx-auto md:mx-0 max-w-md rounded-xl border border-primary/30 bg-surface-elevated/95 px-4 py-3 text-sm text-fg shadow-2xl backdrop-blur-xl"
     >
-      {isArabic
+      {document.documentElement.dir === 'rtl'
         ? 'تم تجهيز تحديث جديد. احفظ ما تكتبه، وبمجرد الخروج من حقل الكتابة سيتم تحديث الموقع تلقائيًا.'
         : 'A new update is ready. Finish your current typing; the site will update automatically when you leave the field.'}
     </div>
