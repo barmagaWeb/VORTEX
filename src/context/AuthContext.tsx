@@ -17,6 +17,7 @@ interface AuthContextType {
   updateUser: (data: Partial<User>) => Promise<User>;
   setPendingVerificationEmail: (email: string) => void;
   resendVerificationEmail: (email?: string) => Promise<boolean>;
+  verifyEmailOtp: (email: string, token: string) => Promise<User>;
   refreshCurrentUser: () => Promise<User | null>;
 }
 
@@ -154,6 +155,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return updated;
   };
 
+  const verifyEmailOtp = async (email: string, token: string): Promise<User> => {
+    const verifiedUser = await authService.verifyEmailOtp(email, token);
+    applyCurrentUser(verifiedUser);
+    setPendingVerificationEmail('');
+    return verifiedUser;
+  };
+
   const resendVerificationEmail = async (email?: string): Promise<boolean> => {
     const targetEmail = (email || pendingEmail || user?.email || '').trim();
     if (!targetEmail) throw new Error('Enter your email address first.');
@@ -197,6 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateUser,
         setPendingVerificationEmail,
         resendVerificationEmail,
+        verifyEmailOtp,
         refreshCurrentUser,
       }}
     >
