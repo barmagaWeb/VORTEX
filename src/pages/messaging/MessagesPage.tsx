@@ -45,6 +45,7 @@ export const MessagesPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const pendingPreviewRef = useRef<string[]>([]);
+  const loadedMessageIds = useRef<Set<string>>(new Set());
   pendingPreviewRef.current = pendingAttachmentPreviews;
 
   useEffect(() => () => {
@@ -84,10 +85,16 @@ export const MessagesPage: React.FC = () => {
       return;
     }
     let active = true;
+    loadedMessageIds.current = new Set();
     const loadMessages = async () => {
       try {
         const result = await messagingService.getMessages(activeConv.id);
         if (!active) return;
+        const nextIds = new Set(result.map((message) => message.id));
+        const hasChanged = nextIds.size !== loadedMessageIds.current.size
+          || result.some((message) => !loadedMessageIds.current.has(message.id));
+        if (!hasChanged) return;
+        loadedMessageIds.current = nextIds;
         setMessages(result);
         await messagingService.markConversationAsRead(activeConv.id);
         await refreshConversations();
@@ -98,6 +105,7 @@ export const MessagesPage: React.FC = () => {
     void loadMessages();
 
     const unsubscribe = messagingService.subscribeToMessages(activeConv.id, (message) => {
+      loadedMessageIds.current.add(message.id);
       setMessages((current) => current.some((item) => item.id === message.id)
         ? current
         : [...current, message]);
