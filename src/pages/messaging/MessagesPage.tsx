@@ -105,13 +105,33 @@ export const MessagesPage: React.FC = () => {
     };
     void loadMessages();
 
-    const unsubscribe = messagingService.subscribeToMessages(activeConv.id, (message) => {
+    const unsubscribe = messagingService.subscribeToInboxMessages((message) => {
+      setConversations((current) => {
+        const index = current.findIndex((conversation) => conversation.id === message.conversationId);
+        if (index < 0) {
+          void refreshConversations();
+          return current;
+        }
+        const isActiveConversation = message.conversationId === activeConv.id;
+        const isIncoming = message.senderId !== user?.id;
+        const updated = {
+          ...current[index],
+          lastMessage: message,
+          unreadCount: isActiveConversation ? 0 : current[index].unreadCount + (isIncoming ? 1 : 0),
+        };
+        return [updated, ...current.filter((conversation) => conversation.id !== message.conversationId)];
+      });
+
+      if (message.conversationId !== activeConv.id) return;
       loadedMessageIds.current.add(message.id);
       setMessages((current) => current.some((item) => item.id === message.id)
         ? current
         : [...current, message]);
-      if (message.senderId !== user?.id) void messagingService.markConversationAsRead(activeConv.id);
-      void refreshConversations();
+      if (message.senderId !== user?.id) {
+        void messagingService.markConversationAsRead(activeConv.id).catch((error: unknown) => {
+          console.error('Unable to mark active conversation as read', error);
+        });
+      }
     });
 
     const interval = window.setInterval(() => { void loadMessages(); }, isSupabaseConfigured() ? 30000 : 5000);
