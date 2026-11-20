@@ -257,6 +257,32 @@ export class SupabaseMessagingService implements IMessagingService {
     if (error) throw new Error(error.message);
   }
 
+  subscribeToInboxMessages(onMessage: (message: Message) => void): () => void {
+    if (!isSupabaseConfigured()) return () => undefined;
+
+    let active = true;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!active || !session?.user) return;
+      const currentUserId = session.user.id;
+      channel = supabase
+        .channel(`vortex-inbox-${currentUserId}-${crypto.randomUUID()}`)
+        .on('postgres_changes', {
+          event: 'INSERT', schema: 'public', table: 'messages',
+        }, (payload) => {
+          const row = payload.new as MessageRow;
+          void this.mapMessage(row, currentUserId)
+            .then(onMessage)
+            .catch((error: unknown) => console.error('VORTEX inbox realtime mapping failed', error));
+        })
+        .subscribe();
+    }).catch((error: unknown) => console.error('VORTEX inbox subscription failed', error));
+
+    return () => {
+      active = false;
+      if (channel) void supabase.removeChannel(channel);
+    };
+  }
   subscribeToMessages(conversationId: string, onMessage: (message: Message) => void): () => void {
     if (!isSupabaseConfigured()) return this.fallbackMock.subscribeToMessages(conversationId, onMessage);
     const channel = supabase
