@@ -15,6 +15,7 @@ export const VerifyEmailPage: React.FC = () => {
     pendingEmail,
     setPendingVerificationEmail,
     resendVerificationEmail,
+    verifyEmailOtp,
     refreshCurrentUser,
   } = useAuth();
   const { t, language, toggleLanguage } = useLanguage();
@@ -25,6 +26,8 @@ export const VerifyEmailPage: React.FC = () => {
   const [email, setEmail] = useState(pendingEmail || user?.email || '');
   const [isSending, setIsSending] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [code, setCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
 
@@ -52,6 +55,29 @@ export const VerifyEmailPage: React.FC = () => {
       setError(requestError instanceof Error ? requestError.message : t('verificationSendFailed'));
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleVerifyCode = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedCode = code.replace(/\\D/g, '').slice(0, 6);
+    if (!normalizedEmail || normalizedCode.length !== 6) {
+      setError(language === 'ar' ? 'اكتب البريد الإلكتروني ورمز التحقق المكوّن من 6 أرقام.' : 'Enter your email and the 6-digit verification code.');
+      return;
+    }
+
+    setError('');
+    setIsVerifying(true);
+    try {
+      await verifyEmailOtp(normalizedEmail, normalizedCode);
+      setPendingVerificationEmail('');
+      showToast(language === 'ar' ? 'تم تأكيد البريد الإلكتروني بنجاح.' : 'Email verified successfully.');
+      navigate('/feed', { replace: true });
+    } catch (verificationError) {
+      setError(verificationError instanceof Error ? verificationError.message : (language === 'ar' ? 'تعذر تأكيد البريد الإلكتروني.' : 'Unable to verify your email.'));
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -113,6 +139,29 @@ export const VerifyEmailPage: React.FC = () => {
               <span>{t('verificationEmailSent')}</span>
             </div>
           )}
+
+          <form onSubmit={handleVerifyCode} className="space-y-3">
+            <label htmlFor="vortex-email-code" className="block text-xs font-semibold text-fg-muted">
+              {language === 'ar' ? 'كود التحقق المكوّن من 6 أرقام' : '6-digit verification code'}
+            </label>
+            <input
+              id="vortex-email-code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={code}
+              onChange={(event) => setCode(event.target.value.replace(/\\D/g, '').slice(0, 6))}
+              placeholder="123456"
+              className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-center text-xl font-bold tracking-[0.45em] text-fg outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+              aria-label={language === 'ar' ? 'كود التحقق' : 'Verification code'}
+              required
+            />
+            <Button type="submit" variant="primary" size="lg" fullWidth isLoading={isVerifying}>
+              {language === 'ar' ? 'تأكيد البريد بالكود' : 'Verify email with code'}
+            </Button>
+          </form>
 
           <form onSubmit={handleResend} className="space-y-4">
             <Input
