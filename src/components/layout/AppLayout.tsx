@@ -44,17 +44,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ showRightSidebar = true, w
         .then(setUnreadNotifsCount)
         .catch((error: unknown) => console.error('Unable to refresh notification count', error));
     });
-    const unsubscribeInbox = messagingService.subscribeToInboxMessages((message) => {
-      if (message.senderId === user?.id) return;
+    const refreshMessageCount = () => {
       void messagingService.getConversations()
         .then((conversations) => setUnreadMessagesCount(
           conversations.reduce((total, conversation) => total + conversation.unreadCount, 0)
         ))
         .catch((error: unknown) => console.error('Unable to refresh message count', error));
+    };
+    const unsubscribeInbox = messagingService.subscribeToInboxMessages((message) => {
+      if (message.senderId !== user?.id) refreshMessageCount();
     });
+    window.addEventListener('vortex:messages_read', refreshMessageCount);
     return () => {
       unsubscribeNotifications();
       unsubscribeInbox();
+      window.removeEventListener('vortex:messages_read', refreshMessageCount);
     };
   }, [refreshUnreadCounts, user?.id]);
 
