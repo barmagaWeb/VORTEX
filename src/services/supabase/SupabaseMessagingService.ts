@@ -113,6 +113,17 @@ export class SupabaseMessagingService implements IMessagingService {
     }));
   }
 
+  async getTotalUnreadCount(): Promise<number> {
+    if (!isSupabaseConfigured()) return this.fallbackMock.getTotalUnreadCount();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return 0;
+
+    const { data, error } = await supabase.rpc('vortex_get_conversation_summaries');
+    if (error) throw new Error(`Failed to load unread message count: ${error.message}`);
+    return ((data || []) as unknown as Array<{ unread_count: number | string }>)
+      .reduce((total, row) => total + Number(row.unread_count || 0), 0);
+  }
+
   async getMessages(conversationId: string): Promise<Message[]> {
     if (!isSupabaseConfigured()) return this.fallbackMock.getMessages(conversationId);
     const { data: { session } } = await supabase.auth.getSession();
