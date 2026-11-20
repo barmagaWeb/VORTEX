@@ -61,7 +61,7 @@ export const VerifyEmailPage: React.FC = () => {
   const handleVerifyCode = async (event: React.FormEvent) => {
     event.preventDefault();
     const normalizedEmail = email.trim().toLowerCase();
-    const normalizedCode = code.replace(/\\D/g, '').slice(0, 6);
+    const normalizedCode = code.replace(/\D/g, '').slice(0, 6);
     if (!normalizedEmail || normalizedCode.length !== 6) {
       setError(language === 'ar' ? 'اكتب البريد الإلكتروني ورمز التحقق المكوّن من 6 أرقام.' : 'Enter your email and the 6-digit verification code.');
       return;
@@ -152,7 +152,7 @@ export const VerifyEmailPage: React.FC = () => {
               pattern="[0-9]{6}"
               maxLength={6}
               value={code}
-              onChange={(event) => setCode(event.target.value.replace(/\\D/g, '').slice(0, 6))}
+              onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
               placeholder="123456"
               className="w-full rounded-xl border border-border bg-bg px-4 py-3 text-center text-xl font-bold tracking-[0.45em] text-fg outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               aria-label={language === 'ar' ? 'كود التحقق' : 'Verification code'}
