@@ -70,7 +70,6 @@ export const PostCard: React.FC<PostCardProps> = ({
       const res = await postService.toggleLike(post.id);
       setIsLiked(res.isLiked);
       setLikesCount(res.likesCount);
-      if (res.isLiked) showToast(t('toastPostLiked'));
     } catch {
       setIsLiked(previousLiked);
       setLikesCount(previousCount);
@@ -94,7 +93,6 @@ export const PostCard: React.FC<PostCardProps> = ({
       const res = await postService.toggleRepost(post.id);
       setIsReposted(res.isReposted);
       setRepostsCount(res.repostsCount);
-      showToast(res.isReposted ? t('toastReposted') : t('toastRepostRemoved'));
     } catch {
       setIsReposted(previousReposted);
       setRepostsCount(previousCount);
@@ -115,7 +113,6 @@ export const PostCard: React.FC<PostCardProps> = ({
     try {
       const bookmarked = await postService.toggleBookmark(post.id);
       setIsBookmarked(bookmarked);
-      showToast(bookmarked ? t('toastBookmarkSaved') : t('toastBookmarkRemoved'));
     } catch {
       setIsBookmarked(previousBookmarked);
       showToast(t('toastBookmarkFailed'), 'error');
