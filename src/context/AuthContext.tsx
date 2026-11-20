@@ -33,6 +33,7 @@ const readPendingEmail = (): string => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [pendingEmail, setPendingEmail] = useState<string>(readPendingEmail);
   // This flag represents initial session restoration only. Form submissions use
   // their own local loading state so GuestRoute does not unmount the form.
@@ -159,8 +160,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return authService.resendConfirmationEmail(targetEmail);
   };
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
   const isAuthenticated = !!user && user.emailVerified !== false;
+
+  // Server-side authorization is the source of truth. Fail closed on errors.
+  useEffect(() => {
+    let active = true;
+    setIsAdmin(false);
+
+    if (!user || user.emailVerified === false) return () => { active = false; };
+
+    const verifyAccess = async () => {
+      try {
+        const allowed = await authService.hasAdminRole();
+        if (active) setIsAdmin(allowed === true);
+      } catch {
+        if (active) setIsAdmin(false);
+      }
+    };
+
+    void verifyAccess();
+    return () => { active = false; };
+  }, [user]);
 
   return (
     <AuthContext.Provider
