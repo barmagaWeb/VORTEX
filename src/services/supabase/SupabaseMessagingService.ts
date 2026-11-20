@@ -266,8 +266,8 @@ export class SupabaseMessagingService implements IMessagingService {
         filter: `conversation_id=eq.${conversationId}`,
       }, (payload) => {
         const row = payload.new as MessageRow;
-        void supabase.auth.getUser()
-          .then(({ data: { user } }) => this.mapMessage(row, user?.id))
+        void supabase.auth.getSession()
+          .then(({ data: { session } }) => this.mapMessage(row, session?.user.id))
           .then(onMessage)
           .catch((error: unknown) => console.error('VORTEX realtime message mapping failed', error));
       })
