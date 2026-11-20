@@ -54,6 +54,15 @@ export class MockAuthService implements IAuthService {
     return newUser;
   }
 
+  async verifyEmailOtp(_email: string, _token: string): Promise<User> {
+    this.assertMockAllowed();
+    const user = await this.getCurrentUser();
+    if (!user) throw new Error('No pending account was found.');
+    const verified = { ...user, emailVerified: true };
+    storage.set(STORAGE_KEY_AUTH, verified);
+    return verified;
+  }
+
   async resendConfirmationEmail(_email: string): Promise<boolean> {
     this.assertMockAllowed();
     await new Promise((r) => setTimeout(r, 250));
