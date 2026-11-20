@@ -74,7 +74,6 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
     try {
       const added = await postService.addComment(postId, content);
       setComments((prev) => prev.map((comment) => comment.id === temporaryId ? added : comment));
-      showToast(t('toastCommentAdded'));
     } catch {
       setComments((prev) => prev.filter((comment) => comment.id !== temporaryId));
       onCommentCountChange?.(Math.max(0, comments.length));
@@ -115,7 +114,6 @@ export const PostComments: React.FC<PostCommentsProps> = ({ postId, onCommentCou
           : comment
       ));
       setReplyToId(null);
-      showToast(t('toastReplyAdded'));
     } catch {
       setComments((prev) => prev.map((comment) =>
         comment.id === parentCommentId
