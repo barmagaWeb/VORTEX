@@ -168,6 +168,22 @@ export class SupabaseAuthService implements IAuthService {
     };
   }
 
+  async verifyEmailOtp(email: string, token: string): Promise<User> {
+    if (!isSupabaseConfigured()) {
+      return this.fallbackMock.verifyEmailOtp(email, token);
+    }
+
+    const { data, error } = await supabase.auth.verifyOtp({
+      email: email.trim().toLowerCase(),
+      token: token.trim(),
+      type: 'signup',
+    });
+
+    if (error) throw new Error(error.message);
+    if (!data.user) throw new Error('Email verification did not return a user session.');
+    return this.mapCurrentUser(data.user);
+  }
+
   async requestPasswordReset(email: string): Promise<boolean> {
     if (!isSupabaseConfigured()) {
       return this.fallbackMock.requestPasswordReset(email);
