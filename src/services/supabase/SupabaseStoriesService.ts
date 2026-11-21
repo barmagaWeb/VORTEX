@@ -1,5 +1,5 @@
 import { IStoriesService, CreateStoryDTO } from '../interfaces/IStoriesService';
-import { Story, StoryGroup, User } from '../../types';
+import { Story, StoryGroup, StoryViewerEntry, User } from '../../types';
 import { supabase, isSupabaseConfigured } from './client';
 import { MockStoriesService } from '../mock/MockStoriesService';
 import { resolveStorageUrl, resolveStorageUrls } from './storage';
@@ -217,5 +217,41 @@ export class SupabaseStoriesService implements IStoriesService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async getStoryViewers(storyId: string): Promise<StoryViewerEntry[]> {
+    if (!isSupabaseConfigured()) {
+      return this.fallbackMock.getStoryViewers(storyId);
+    }
+
+    // RLS ("Story owners viewers and moderators view story receipts") decides who may read these rows;
+    // for anyone but the story owner this simply returns an empty list.
+    const { data, error } = await supabase
+      .from('story_views')
+      .select('viewed_at, profiles:viewer_id(id, name, username, avatar, verified, followers_count, following_count, posts_count, created_at, role)')
+      .eq('story_id', storyId)
+      .order('viewed_at', { ascending: false })
+      .limit(200);
+
+    if (error) throw new Error(error.message);
+
+    const rows = (data ?? []) as unknown as Array<{ viewed_at: string; profiles: StoryProfileRow | StoryProfileRow[] | null }>;
+    return rows.flatMap((row) => {
+      const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+      if (!profile?.id) return [];
+      const user: User = {
+        id: profile.id,
+        name: profile.name || 'VORTEX Member',
+        username: profile.username || '',
+        avatar: profile.avatar || '',
+        verified: profile.verified || false,
+        followersCount: profile.followers_count || 0,
+        followingCount: profile.following_count || 0,
+        postsCount: profile.posts_count || 0,
+        joinedDate: profile.created_at ? new Date(profile.created_at).toLocaleDateString() : '',
+        role: profile.role || 'user',
+      };
+      return [{ user, viewedAt: row.viewed_at }];
+    });
   }
 }

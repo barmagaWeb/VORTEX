@@ -1,5 +1,5 @@
 import { IStoriesService, CreateStoryDTO } from '../interfaces/IStoriesService';
-import { Story, StoryGroup, User } from '../../types';
+import { Story, StoryGroup, StoryViewerEntry, User } from '../../types';
 import { CURRENT_USER, MOCK_USERS } from '../../constants/mockData';
 import { storage } from './storage';
 
@@ -174,5 +174,10 @@ export class MockStoriesService implements IStoriesService {
     const filtered = stories.filter((s) => s.id !== storyId);
     this.saveStoriesStore(filtered);
     return true;
+  }
+
+  async getStoryViewers(_storyId: string): Promise<StoryViewerEntry[]> {
+    // The mock keeps only a per-device viewed list, so there is no real viewer roster to show.
+    return [];
   }
 }

@@ -108,16 +108,33 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
         </div>
 
         {previewUrl && (
-          <div className="relative flex max-h-64 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface">
-            <img src={previewUrl} alt={t('storyPreviewAlt')} className="max-h-60 w-auto rounded-xl object-contain" />
-            <button
-              type="button"
-              onClick={() => { setMediaPath(''); setPreviewUrl(''); }}
-              className="absolute top-2 end-2 rounded-full bg-black/70 p-1.5 text-white hover:bg-black"
-              aria-label={t('removeSelectedImage')}
-            >
-              <X className="h-4 w-4" />
-            </button>
+          <div className="space-y-2">
+            {/* Live 9:16 preview: exactly how the photo and caption will sit inside the story */}
+            <div className="relative mx-auto aspect-[9/16] max-h-[52dvh] overflow-hidden rounded-2xl border border-border bg-black shadow-lg">
+              <img src={previewUrl} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-60 blur-2xl" />
+              <img src={previewUrl} alt={t('storyPreviewAlt')} className="absolute inset-0 h-full w-full object-contain" />
+              <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent px-3 pb-6 pt-3">
+                <div className="h-[3px] w-full rounded-full bg-white/30"><div className="h-full w-1/3 rounded-full bg-white" /></div>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <img src={user?.avatar} alt="" className="h-7 w-7 rounded-full object-cover ring-1 ring-white/30" />
+                  <span className="truncate text-xs font-semibold text-white"><bdi>{user?.name}</bdi></span>
+                </div>
+              </div>
+              {caption.trim() && (
+                <p dir="auto" className="pointer-events-none absolute inset-x-0 bottom-0 line-clamp-4 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pb-4 pt-12 text-center text-xs font-medium leading-relaxed text-white [overflow-wrap:anywhere]">
+                  {caption}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => { setMediaPath(''); setPreviewUrl(''); }}
+                className="absolute top-2 end-2 rounded-full bg-black/60 p-1.5 text-white hover:bg-black"
+                aria-label={t('removeSelectedImage')}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="text-center text-[11px] text-fg-muted">{t('storyPreviewHint')}</p>
           </div>
         )}
 
@@ -132,6 +149,7 @@ export const CreateStoryModal: React.FC<CreateStoryModalProps> = ({ isOpen, onCl
             dir="auto"
             className="w-full resize-none rounded-xl border border-border bg-surface p-3 text-xs text-fg outline-none focus:border-primary placeholder:text-fg-subtle"
           />
+          <p className="text-end text-[11px] text-fg-subtle" aria-hidden="true">{caption.length}/500</p>
         </div>
 
         <div className="flex justify-end gap-2 border-t border-border pt-2">

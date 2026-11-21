@@ -7,149 +7,158 @@ import { useLanguage } from '../../context/LanguageContext';
 import { StoryViewer } from './StoryViewer';
 import { CreateStoryModal } from './CreateStoryModal';
 
+const FALLBACK_AVATAR =
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+
+const RING_UNSEEN = 'bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-blue-500';
+const RING_SEEN = 'bg-border';
+
+/** Your own stories first, then people you haven't caught up with, then everyone else (original order kept). */
+const orderGroups = (groups: StoryGroup[], currentUserId?: string): StoryGroup[] => {
+  const rank = (group: StoryGroup) => (group.user.id === currentUserId ? 0 : group.hasUnviewed ? 1 : 2);
+  return groups
+    .map((group, index) => ({ group, index }))
+    .sort((a, b) => rank(a.group) - rank(b.group) || a.index - b.index)
+    .map(({ group }) => group);
+};
+
+const withViewedStory = (groups: StoryGroup[], storyId: string): StoryGroup[] =>
+  groups.map((group) => {
+    if (!group.stories.some((story) => story.id === storyId)) return group;
+    const stories = group.stories.map((story) => (story.id === storyId ? { ...story, isViewed: true } : story));
+    return { ...group, stories, hasUnviewed: stories.some((story) => !story.isViewed) };
+  });
+
 export const StoriesBar: React.FC = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
 
   const [storyGroups, setStoryGroups] = useState<StoryGroup[]>([]);
-  const [selectedGroupIndex, setSelectedGroupIndex] = useState<number | null>(null);
+  // Frozen at the moment the viewer opens so live "seen" updates never move the playhead.
+  const [selected, setSelected] = useState<{ group: number; story: number } | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadStoryGroups = useCallback(async () => {
     try {
       const groups = await storiesService.getStoryGroups();
-      setStoryGroups(groups);
+      setStoryGroups(orderGroups(groups, user?.id));
     } catch {
-      // ignore
+      // The bar is optional chrome; the feed must keep working if stories fail to load.
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    loadStoryGroups();
+    void loadStoryGroups();
   }, [loadStoryGroups]);
 
-  const handleOpenViewer = (index: number) => {
-    setSelectedGroupIndex(index);
+  const openViewer = (index: number) => {
+    const firstUnseen = storyGroups[index]?.stories.findIndex((story) => !story.isViewed) ?? -1;
+    setSelected({ group: index, story: firstUnseen > 0 ? firstUnseen : 0 });
   };
 
-  const handleStoryCreated = () => {
-    loadStoryGroups();
-  };
+  const handleStoryViewed = useCallback((storyId: string) => {
+    setStoryGroups((groups) => withViewedStory(groups, storyId));
+  }, []);
 
-  const userHasStory = storyGroups.some((g) => g.user.id === user?.id);
-  const userStoryGroupIndex = storyGroups.findIndex((g) => g.user.id === user?.id);
+  const ownGroupIndex = storyGroups.findIndex((group) => group.user.id === user?.id);
+  const userHasStory = ownGroupIndex !== -1;
 
   return (
     <>
-      <div className="relative py-2.5 px-4 overflow-x-auto no-scrollbar border-b border-border bg-surface/50 select-none">
-        <div className="flex items-center gap-3.5 sm:gap-4 min-w-max">
-          {/* Create / Your Story Item */}
-          <div className="flex flex-col items-center gap-1.5 cursor-pointer group">
+      <div className="no-scrollbar relative select-none overflow-x-auto border-b border-border bg-surface/50 px-4 py-3">
+        <div className="flex min-w-max items-start gap-4">
+          {/* Your story */}
+          <div className="group flex w-[72px] flex-col items-center gap-1.5">
             <div className="relative">
               <button
-                onClick={() => {
-                  if (userHasStory && userStoryGroupIndex !== -1) {
-                    handleOpenViewer(userStoryGroupIndex);
-                  } else {
-                    setIsCreateModalOpen(true);
-                  }
-                }}
-                className={`relative p-0.5 rounded-full transition-transform group-hover:scale-105 ${
-                  userHasStory
-                    ? 'bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-blue-500 p-[2.5px]'
-                    : ''
+                type="button"
+                onClick={() => (userHasStory ? openViewer(ownGroupIndex) : setIsCreateModalOpen(true))}
+                className={`block rounded-full p-[2.5px] transition-transform active:scale-95 group-hover:scale-105 ${
+                  userHasStory ? RING_UNSEEN : 'bg-transparent'
                 }`}
+                aria-label={userHasStory ? t('yourStory') : t('addStory')}
               >
                 <img
-                  src={
-                    user?.avatar ||
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
-                  }
-                  alt={user?.name || 'Your Story'}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-surface"
+                  src={user?.avatar || FALLBACK_AVATAR}
+                  alt=""
+                  className="h-16 w-16 rounded-full border-[3px] border-surface object-cover"
                 />
               </button>
-
-              {/* Plus badge */}
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsCreateModalOpen(true);
-                }}
-                className="absolute bottom-0 end-0 p-1 rounded-full bg-primary hover:bg-primary-hover text-primary-fg border-2 border-surface shadow-md transition-transform hover:scale-110 min-w-[24px] min-h-[24px] flex items-center justify-center"
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+                className="absolute -bottom-0.5 end-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface bg-primary text-primary-fg shadow-md transition-transform hover:scale-110"
                 title={t('addStory')}
                 aria-label={t('addStory')}
               >
-                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <Plus className="h-3.5 w-3.5 stroke-[3]" />
               </button>
             </div>
-            <span className="text-[11px] font-medium text-fg-muted max-w-[68px] truncate">
-              {t('yourStory')}
-            </span>
+            <span className="w-full truncate text-center text-[11px] font-medium text-fg-muted">{t('yourStory')}</span>
           </div>
 
-          {/* Other Users' Stories */}
-          {loading ? (
-            // Skeleton circles
-            [1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-1.5">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-surface-hover animate-pulse border-2 border-border" />
-                <div className="w-10 h-2 bg-surface-hover rounded animate-pulse" />
-              </div>
-            ))
-          ) : (
-            storyGroups
-              .filter((g) => g.user.id !== user?.id)
-              .map((group) => {
-                const actualIndex = storyGroups.findIndex((g) => g.user.id === group.user.id);
+          {/* Everyone else */}
+          {loading
+            ? [1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex w-[72px] flex-col items-center gap-1.5" aria-hidden="true">
+                  <div className="h-[70px] w-[70px] animate-pulse rounded-full bg-surface-hover" />
+                  <div className="h-2 w-10 animate-pulse rounded bg-surface-hover" />
+                </div>
+              ))
+            : storyGroups.map((group, index) => {
+                if (group.user.id === user?.id) return null;
                 return (
                   <button
+                    type="button"
                     key={group.user.id}
-                    onClick={() => handleOpenViewer(actualIndex)}
-                    className="flex flex-col items-center gap-1.5 cursor-pointer group focus:outline-none"
+                    onClick={() => openViewer(index)}
+                    className="group flex w-[72px] flex-col items-center gap-1.5 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={group.user.name}
                   >
-                    <div
-                      className={`p-[2.5px] rounded-full transition-transform group-hover:scale-105 ${
-                        group.hasUnviewed
-                          ? 'bg-gradient-to-tr from-violet-600 via-fuchsia-500 to-blue-500 shadow-[0_0_12px_rgba(139,92,246,0.3)]'
-                          : 'border-2 border-border p-[1.5px]'
+                    <span
+                      className={`block rounded-full p-[2.5px] transition-transform active:scale-95 group-hover:scale-105 ${
+                        group.hasUnviewed ? `${RING_UNSEEN} shadow-[0_0_12px_rgba(139,92,246,0.35)]` : RING_SEEN
                       }`}
                     >
                       <img
-                        src={group.user.avatar}
-                        alt={group.user.name}
-                        className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-surface"
+                        src={group.user.avatar || FALLBACK_AVATAR}
+                        alt=""
+                        loading="lazy"
+                        className="h-16 w-16 rounded-full border-[3px] border-surface object-cover"
                       />
-                    </div>
-                    <span className="text-[11px] font-medium text-fg-muted max-w-[68px] truncate">
+                    </span>
+                    <span
+                      className={`w-full truncate text-center text-[11px] ${
+                        group.hasUnviewed ? 'font-semibold text-fg' : 'font-medium text-fg-muted'
+                      }`}
+                    >
                       <bdi>{group.user.name.split(' ')[0]}</bdi>
                     </span>
                   </button>
                 );
-              })
-          )}
+              })}
         </div>
       </div>
 
-      {/* Story Viewer Modal */}
-      {selectedGroupIndex !== null && (
+      {selected !== null && (
         <StoryViewer
           storyGroups={storyGroups}
-          initialGroupIndex={selectedGroupIndex}
-          isOpen={selectedGroupIndex !== null}
-          onClose={() => setSelectedGroupIndex(null)}
-          onStoryDeleted={() => loadStoryGroups()}
+          initialGroupIndex={selected.group}
+          initialStoryIndex={selected.story}
+          isOpen
+          onClose={() => setSelected(null)}
+          onStoryViewed={handleStoryViewed}
+          onStoryDeleted={() => void loadStoryGroups()}
         />
       )}
 
-      {/* Create Story Modal */}
       <CreateStoryModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onStoryCreated={handleStoryCreated}
+        onStoryCreated={() => void loadStoryGroups()}
       />
     </>
   );

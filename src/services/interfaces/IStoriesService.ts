@@ -1,4 +1,4 @@
-import { Story, StoryGroup } from '../../types';
+import { Story, StoryGroup, StoryViewerEntry } from '../../types';
 
 export interface CreateStoryDTO {
   mediaUrl: string;
@@ -12,4 +12,6 @@ export interface IStoriesService {
   createStory(dto: CreateStoryDTO): Promise<Story>;
   viewStory(storyId: string): Promise<void>;
   deleteStory(storyId: string): Promise<boolean>;
+  /** Viewers of one of the current user's own stories, newest first. */
+  getStoryViewers(storyId: string): Promise<StoryViewerEntry[]>;
 }

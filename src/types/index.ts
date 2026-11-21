@@ -156,6 +156,12 @@ export interface StoryGroup {
   hasUnviewed: boolean;
 }
 
+/** One person who viewed a story; only the story owner (and moderators) can read these rows. */
+export interface StoryViewerEntry {
+  user: User;
+  viewedAt: string;
+}
+
 
 export interface Hashtag {
   tag: string;
