@@ -23,7 +23,7 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`relative flex items-center gap-2 py-3.5 px-4 text-sm font-semibold whitespace-nowrap transition-colors focus:outline-none focus-visible:text-primary min-h-[44px] ${
+            className={`relative flex shrink-0 items-center gap-2 py-3.5 px-3 sm:px-4 text-sm font-semibold whitespace-nowrap transition-colors focus:outline-none focus-visible:text-primary min-h-[44px] ${
               isActive
                 ? 'text-fg'
                 : 'text-fg-muted hover:text-fg'
