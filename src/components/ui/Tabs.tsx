@@ -17,10 +17,11 @@ interface TabsProps {
 export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className = '' }) => {
   return (
     <div
-      className={`w-full min-w-0 overflow-x-auto overflow-y-hidden border-b border-border no-scrollbar ${className}`}
+      className={`w-full min-w-0 border-b border-border pb-2 ${className}`}
       role="tablist"
+      aria-label="Admin sections"
     >
-      <div className="flex w-max min-w-full items-stretch gap-1">
+      <div className="grid w-full min-w-0 grid-cols-1 min-[520px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -30,10 +31,18 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
               role="tab"
               aria-selected={isActive}
               onClick={() => onChange(tab.id)}
-              className={`relative inline-flex min-h-[48px] flex-none items-center justify-center gap-2 whitespace-nowrap px-3 py-3 text-xs sm:px-4 sm:text-sm font-semibold leading-5 transition-colors focus:outline-none focus-visible:text-primary ${isActive ? 'text-fg' : 'text-fg-muted hover:text-fg'}`}
+              className={`relative flex min-h-11 min-w-0 w-full items-center justify-center gap-2 rounded-lg border px-2.5 py-2 text-center text-xs sm:text-sm font-semibold leading-5 whitespace-normal break-words transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                isActive
+                  ? 'border-primary/40 bg-primary/10 text-fg'
+                  : 'border-transparent text-fg-muted hover:border-border hover:bg-surface-hover hover:text-fg'
+              }`}
             >
-              {tab.icon && <span className="inline-flex h-4 w-4 flex-none items-center justify-center">{tab.icon}</span>}
-              <span className="inline-block flex-none">{tab.label}</span>
+              {tab.icon && (
+                <span className="inline-flex h-4 w-4 flex-none items-center justify-center" aria-hidden="true">
+                  {tab.icon}
+                </span>
+              )}
+              <span className="min-w-0 [overflow-wrap:anywhere]">{tab.label}</span>
               {tab.count !== undefined && (
                 <span
                   className={`inline-flex flex-none items-center rounded-full px-2 py-0.5 text-xs font-medium leading-4 ${
@@ -42,9 +51,6 @@ export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange, className
                 >
                   {tab.count}
                 </span>
-              )}
-              {isActive && (
-                <span className="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-gradient-to-r from-violet-500 to-blue-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
               )}
             </button>
           );
