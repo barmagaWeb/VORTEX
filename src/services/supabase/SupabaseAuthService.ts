@@ -10,7 +10,7 @@ const getAppRedirectUrl = (path: string): string => {
   const configuredBase = String(import.meta.env.VITE_APP_URL || '').trim();
   const runtimeBase = `${window.location.origin}${import.meta.env.BASE_URL || '/'}`;
   const base = configuredBase || runtimeBase;
-  const normalizedPath = path.replace(/^\\/+/, '');
+  const normalizedPath = path.replace(/^\/+/, '');
   return new URL(normalizedPath, base.endsWith('/') ? base : `${base}/`).toString();
 };
 
