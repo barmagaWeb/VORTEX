@@ -14,14 +14,20 @@ export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    setError('');
     setIsLoading(true);
     try {
       await authService.requestPasswordReset(email);
       setIsSubmitted(true);
+    } catch {
+      setError(language === 'ar'
+        ? 'تعذر إرسال رابط استعادة كلمة المرور. تحقق من البريد وحاول مرة أخرى.'
+        : 'Unable to send the password recovery link. Check the email address and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +91,7 @@ export const ForgotPasswordPage: React.FC = () => {
                 leftIcon={<Mail className="w-4 h-4" />}
                 required
               />
+              {error && <p role="alert" className="text-xs text-danger-text font-semibold">{error}</p>}
               <Button
                 type="submit"
                 variant="primary"
