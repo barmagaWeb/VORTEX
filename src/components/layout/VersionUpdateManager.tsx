@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 declare const __VORTEX_BUILD_VERSION__: string;
 
 const BUILD_VERSION = __VORTEX_BUILD_VERSION__;
-const VERSION_URL = '/version.json';
+const VERSION_URL = `${import.meta.env.BASE_URL}version.json`;
 const CHECK_INTERVAL_MS = 45_000;
 
 export const VersionUpdateManager: React.FC = () => {

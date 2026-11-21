@@ -3,6 +3,8 @@ name: Deploy VORTEX to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -30,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run unit and component tests
+        run: npm test
+
       - name: Build Vite application
         run: npm run build
         env:
@@ -53,6 +58,7 @@ jobs:
           path: dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

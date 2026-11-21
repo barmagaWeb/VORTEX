@@ -139,10 +139,10 @@ export const SignInPage: React.FC = () => {
         <form onSubmit={handleSignIn} className="p-6 rounded-3xl bg-surface border border-border shadow-card space-y-4">
           <Input
             label={t('emailLabel')}
-            type="text"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={t('emailOrUsernamePlaceholder')}
+            placeholder="you@domain.com"
             leftIcon={<Mail className="w-4 h-4" />}
             required
           />
