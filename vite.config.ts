@@ -28,6 +28,8 @@ const versionAssetPlugin: Plugin = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // GitHub Pages serves this repository under /VORTEX/; root-hosted builds stay at /.
+  base: process.env.GITHUB_ACTIONS === 'true' ? '/VORTEX/' : '/',
   define: {
     __VORTEX_BUILD_VERSION__: JSON.stringify(buildVersion),
   },
