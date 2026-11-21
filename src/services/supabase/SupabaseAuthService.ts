@@ -8,11 +8,10 @@ const DEFAULT_AVATAR =
 
 const getAppRedirectUrl = (path: string): string => {
   const configuredBase = String(import.meta.env.VITE_APP_URL || '').trim();
-  const fallbackBase = import.meta.env.DEV
-    ? 'https://vortex-4fl.pages.dev'
-    : window.location.origin;
-  const base = configuredBase || fallbackBase;
-  return new URL(path, base.endsWith('/') ? base : `${base}/`).toString();
+  const runtimeBase = `${window.location.origin}${import.meta.env.BASE_URL || '/'}`;
+  const base = configuredBase || runtimeBase;
+  const normalizedPath = path.replace(/^\\/+/, '');
+  return new URL(normalizedPath, base.endsWith('/') ? base : `${base}/`).toString();
 };
 
 export class SupabaseAuthService implements IAuthService {
