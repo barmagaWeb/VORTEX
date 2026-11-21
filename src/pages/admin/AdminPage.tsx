@@ -164,12 +164,12 @@ export const AdminPage: React.FC = () => {
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2.5">
             <ShieldCheck className="w-6 h-6 text-primary" />
-            <div>
-              <h1 className="text-lg font-black text-fg">{t('adminDashboard')}</h1>
+            <div className="min-w-0">
+              <h1 className="break-words text-lg font-black text-fg">{t('adminDashboard')}</h1>
               <span className="text-[11px] text-fg-muted">{t('adminConsoleSubtitle')}</span>
             </div>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-surface-hover text-fg-muted border border-border font-semibold">
+          <span className="max-w-full break-words text-center text-xs px-2.5 py-1 rounded-full bg-surface-hover text-fg-muted border border-border font-semibold">
             {t('adminHealth', { value: metrics?.serverHealth == null ? t('adminHealthNotMonitored') : `${metrics.serverHealth}%` })}
           </span>
         </div>
@@ -198,7 +198,7 @@ export const AdminPage: React.FC = () => {
         {/* Overview Tab */}
         {activeTab === 'overview' && metrics && (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4">
+            <div className="grid min-w-0 grid-cols-1 min-[420px]:grid-cols-2 xl:grid-cols-4 gap-2.5 sm:gap-4">
               <div className="min-w-0 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border">
                 <span className="text-xs text-fg-muted font-medium block">{t('totalUsers')}</span>
                 <span className="text-lg sm:text-xl lg:text-2xl font-black leading-tight text-fg mt-1.5 block tabular-nums">
@@ -209,13 +209,13 @@ export const AdminPage: React.FC = () => {
 
               <div className="min-w-0 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border">
                 <span className="text-xs text-fg-muted font-medium block">{t('activeToday')}</span>
-                <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
+                <span className="break-words text-xl sm:text-2xl font-black text-fg mt-1 block tabular-nums">
                   {metrics.activeToday == null ? '—' : metrics.activeToday.toLocaleString()}
                 </span>
                 <span className="text-[11px] text-fg-subtle mt-1 block">{t('adminActivityUnavailable')}</span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-surface border border-border">
+              <div className="min-w-0 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface border border-border">
                 <span className="text-xs text-fg-muted font-medium block">{t('totalPostsCount')}</span>
                 <span className="text-xl sm:text-2xl font-black text-fg mt-1 block">
                   {metrics.totalPosts.toLocaleString()}
@@ -261,7 +261,7 @@ export const AdminPage: React.FC = () => {
                           "{rep.reportedItemSnippet}"
                         </p>
                       </div>
-                      {can('reports.manage') && <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {can('reports.manage') && <div className="flex min-w-0 flex-wrap items-center gap-2">
                         <button
                           onClick={() => handleResolveReport(rep.id, 'dismiss')}
                           className="px-2.5 py-1 rounded-lg text-fg-muted hover:text-fg hover:bg-surface-hover"
@@ -286,7 +286,7 @@ export const AdminPage: React.FC = () => {
         {activeTab === 'users' && (
           <div className="space-y-4">
             <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
-              <table className="w-full min-w-[620px] text-start text-xs text-fg-muted">
+              <table className="w-full min-w-[680px] text-start text-xs text-fg-muted">
                 <thead className="bg-bg text-fg-muted border-b border-border uppercase tracking-wider text-[10px]">
                   <tr>
                     <th className="p-3.5 text-start">{t('colUser')}</th>
@@ -319,7 +319,7 @@ export const AdminPage: React.FC = () => {
                           <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{t('activeStatus')}</span>
                         )}
                       </td>
-                      <td className="p-3.5 text-end">\n                        <div className="flex flex-wrap justify-end gap-2">
+                      <td className="p-3.5 text-end">\n                        <div className="flex min-w-0 flex-wrap justify-end gap-2">
                         {can('users.verify') && <Button
                           onClick={() => handleToggleVerification(u.id, u.username)}
                           variant="outline"
@@ -402,7 +402,7 @@ export const AdminPage: React.FC = () => {
         )}
 
         {activeTab === 'admins' && isSuperAdmin && (
-          <section className="w-full max-w-3xl rounded-xl sm:rounded-2xl border border-border bg-surface p-4 sm:p-6 space-y-4 sm:space-y-5">
+          <section className="min-w-0 w-full max-w-3xl rounded-xl sm:rounded-2xl border border-border bg-surface p-4 sm:p-6 space-y-4 sm:space-y-5">
             <div className="space-y-1">
               <h2 className="text-base font-bold text-fg">{t('adminAccess')}</h2>
               <p className="text-sm text-fg-muted">{t('adminAccessDescription')}</p>
@@ -427,15 +427,15 @@ export const AdminPage: React.FC = () => {
                     onChange={(event) => setSelectedAdminPermissions((current) => event.target.checked
                       ? [...current, permission]
                       : current.filter((item) => item !== permission))}
-                    className="mt-0.5 accent-current"
+                    className="mt-0.5 shrink-0 accent-current"
                   />
                   <span className="min-w-0 break-words">{label}</span>
                 </label>
               ))}
             </div>
             <p className="text-xs text-fg-muted">{t('revokeAdminAccessHint')}</p>
-            <div className="flex justify-end">
-              <Button onClick={handleSaveAdminAccess} disabled={isSavingAdmin || !adminEmail.trim()}>
+            <div className="flex min-w-0 justify-end">
+              <Button className="max-w-full whitespace-normal break-words text-center" onClick={handleSaveAdminAccess} disabled={isSavingAdmin || !adminEmail.trim()}>
                 {isSavingAdmin ? t('loading') : t('saveAdminAccess')}
               </Button>
             </div>
